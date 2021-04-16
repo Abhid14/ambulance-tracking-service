@@ -1,0 +1,26 @@
+{
+  "cwd": "D:\\Abhishek Project Files\\ambulance tracker\\ambulance-tracking-service",
+  "type": [
+    "pwa"
+  ],
+  "name": "Ambulance Tracker",
+  "framework": "core",
+  "template": "tabs",
+  "bundler": "webpack",
+  "cssPreProcessor": false,
+  "theming": {
+    "customColor": false,
+    "color": "#007aff",
+    "darkTheme": false,
+    "iconFonts": true,
+    "fillBars": false
+  },
+  "customBuild": false,
+  "webpack": {
+    "developmentSourceMap": true,
+    "productionSourceMap": true,
+    "hashAssets": false,
+    "preserveAssetsPaths": false,
+    "inlineAssets": true
+  }
+}
