@@ -10,14 +10,6 @@
        url(../fonts/MaterialIcons-Regular.woff) format('woff'),
        url(../fonts/MaterialIcons-Regular.ttf) format('truetype');
 }
-@font-face {
-  font-family: 'Google Sans';
-  font-style: normal;
-  font-weight: 400;
-  src: url(../fonts/GoogleSans-Regular.eot);
-  src: local('Google Sans'), local('GoogleSans-Regular'), url(../fonts/GoogleSans-Regular.woff2) format('woff2'), url(../fonts/GoogleSans-Regular.woff) format('woff'), url(../fonts/GoogleSans-Regular.ttf) format('truetype');
-}
-
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;
@@ -66,7 +58,4 @@
   -moz-font-feature-settings: "liga";
   font-feature-settings: "liga";
   text-align: center;
-}
-:root {
-  --f7-font-family: 'Google Sans', Arial, sans-serif, system-ui;
 }
