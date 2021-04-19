@@ -5,7 +5,7 @@
   ],
   "name": "Ambulance Tracker",
   "framework": "core",
-  "template": "single-view",
+  "template": "tabs",
   "bundler": "webpack",
   "cssPreProcessor": false,
   "theming": {

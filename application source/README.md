@@ -12,7 +12,7 @@ Framework7 app created with following options:
   ],
   "name": "Ambulance Tracker",
   "framework": "core",
-  "template": "single-view",
+  "template": "tabs",
   "bundler": "webpack",
   "cssPreProcessor": false,
   "theming": {
