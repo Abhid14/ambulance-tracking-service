@@ -1,0 +1,14 @@
+<template>
+  <!--Adding links to route the unconventional way
+-->
+  <div class="page">
+    <a class="display-none" href="/login/" data-view=".view-main" id="log">a</a>
+    <a class="display-none" href="/ambulance/" data-view=".view-main" id="amb">b</a>
+    <a class="display-none" href="/police/" data-view=".view-main" id="pol">c</a>
+  </div>
+</template>
+<script>
+  export default () => {
+    return $render;
+  };
+</script>
