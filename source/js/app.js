@@ -128,42 +128,56 @@ function signIn() {
       .open();
   }
 }
-firebase.auth().onAuthStateChanged(function (user) {
-  if (user) {
-    var loggedDept = localStorage.getItem("loggedDept");
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      var loggedDept = localStorage.getItem("loggedDept");
 
-    if (document.getElementById("resetloginform")) {
-      document.getElementById("resetloginform").click();
-      app.dialog.close();
-    }
-
-    document.getElementById(loggedDept).click();
-    setTimeout(() => {
-      switch (loggedDept) {
-        case "amb":
-          getAmbData(user.uid)
-          document.getElementById("userNameA").innerText = localStorage.getItem('userNameA');
-          document.getElementById("userBranchA").innerText = localStorage.getItem('userBranchA');
-          document.getElementById("vehicleNumber").innerText = localStorage.getItem('vehicleNumber');
-          document.getElementById("userEmailA").innerText = user.email;
-          break;
-        case "pol":
-          getPolData(user.uid)
-          document.getElementById("userNameP").innerText = localStorage.getItem('userNameP');
-          document.getElementById("userBranchP").innerText = localStorage.getItem('userBranchP');
-          document.getElementById("userEmailP").innerText = user.email;
-          break;
+      if (document.getElementById("resetloginform")) {
+        document.getElementById("resetloginform").click();
+        app.dialog.close();
       }
-      //todo set ambulance and police
-      //document.getElementById("userNameP").innerText = "ABCD";
-    }, 1000);
-    // ...
-  } else {
-    // User is signed out.
-    // ...
-    document.getElementById("log").click();
-  }
-});
+
+      document.getElementById(loggedDept).click();
+      setTimeout(() => {
+        switch (loggedDept) {
+          case "amb":
+            getAmbData(user.uid)
+            document.getElementById("userNameA").innerText = localStorage.getItem('userNameA');
+            document.getElementById("userBranchA").innerText = localStorage.getItem('userBranchA');
+            document.getElementById("vehicleNumber").innerText = localStorage.getItem('vehicleNumber');
+            document.getElementById("userEmailA").innerText = user.email;
+            break;
+          case "pol":
+            getPolData(user.uid)
+            document.getElementById("userNameP").innerText = localStorage.getItem('userNameP');
+            document.getElementById("userBranchP").innerText = localStorage.getItem('userBranchP');
+            document.getElementById("userEmailP").innerText = user.email;
+            break;
+        }
+        //todo set ambulance and police
+        //document.getElementById("userNameP").innerText = "ABCD";
+      }, 500);
+      // ...
+    } else {
+      // User is signed out.
+      // ...
+      document.getElementById("log").click();
+    }
+  });
+} else {
+  setTimeout(() => {
+    document.getElementById('pwainstall').click();
+  }, 2000)
+}
+
+/* if (localStorage.getItem('appinstalled') == "true") {
+alert(3);
+document.getElementById("pwaopen").click();
+} else {
+document.getElementById('pwainstall').click();
+}*/
+
 function signUsrOut() {
   localStorage.clear()
   firebase
@@ -209,3 +223,7 @@ function sendDataAmb(x) {
 function recieveDataPolice(x) {
   x
 }
+window.addEventListener('appinstalled', (evt) => {
+  alert('App has been added/installed on your device please launch app from your launcher!!');
+  location.reload();
+});

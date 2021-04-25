@@ -3,9 +3,16 @@
   "short_name": "Ambulance Tracker",
   "description": "Ambulance Tracker",
   "lang": "en-US",
+  "scope": "/",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#EE350F",
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://example.com/manifest.json"
+    }
+  ],
   "theme_color": "#EE350F",
   "icons": [
     {
