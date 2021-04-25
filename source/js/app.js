@@ -133,11 +133,9 @@ firebase.auth().onAuthStateChanged(function (user) {
         };
         if (window.matchMedia('(display-mode: standalone)').matches) {
             document.getElementById(localStorage.getItem("loggedDept")).click();
-            alert(100)
             setTimeout(() => {
                 switch (localStorage.getItem("loggedDept")) {
                     case "amb":
-                        alert(50)
                         getAmbData(user.uid)
                         document.getElementById("userNameA").innerText = localStorage.getItem('userNameA');
                         document.getElementById("userBranchA").innerText = localStorage.getItem('userBranchA');
@@ -145,7 +143,6 @@ firebase.auth().onAuthStateChanged(function (user) {
                         document.getElementById("userEmailA").innerText = user.email;
                         break;
                     case "pol":
-                        alert(60)
                         getPolData(user.uid)
                         document.getElementById("userNameP").innerText = localStorage.getItem('userNameP');
                         document.getElementById("userBranchP").innerText = localStorage.getItem('userBranchP');
