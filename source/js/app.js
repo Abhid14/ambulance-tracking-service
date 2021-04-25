@@ -131,14 +131,12 @@ function signIn() {
 if (window.matchMedia('(display-mode: standalone)').matches) {
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
-      var loggedDept = localStorage.getItem("loggedDept");
-
       if (document.getElementById("resetloginform")) {
         document.getElementById("resetloginform").click();
         app.dialog.close();
       }
 
-      document.getElementById(loggedDept).click();
+      document.getElementById(localStorage.getItem("loggedDept")).click();
       setTimeout(() => {
         switch (loggedDept) {
           case "amb":
@@ -157,27 +155,20 @@ if (window.matchMedia('(display-mode: standalone)').matches) {
         }
         //todo set ambulance and police
         //document.getElementById("userNameP").innerText = "ABCD";
-      }, 500);
-      // ...
-    } else {
+      }, 1500)
+    }
+    // ...
+    else {
       // User is signed out.
       // ...
       document.getElementById("log").click();
-    }
+    };
   });
 } else {
   setTimeout(() => {
     document.getElementById('pwainstall').click();
   }, 2000)
 }
-
-/* if (localStorage.getItem('appinstalled') == "true") {
-alert(3);
-document.getElementById("pwaopen").click();
-} else {
-document.getElementById('pwainstall').click();
-}*/
-
 function signUsrOut() {
   localStorage.clear()
   firebase
