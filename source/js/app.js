@@ -95,14 +95,9 @@ function signIn() {
     var formData = app.form.convertToData("#login-form");
     firebase
       .auth()
-      .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .signInWithEmailAndPassword(formData.email, formData.password)
       .then(() => {
-        return firebase
-          .auth()
-          .signInWithEmailAndPassword(formData.email, formData.password)
-          .then(() => {
-            localStorage.setItem("loggedDept", userDept);
-          });
+        localStorage.setItem("loggedDept", userDept);
       })
       .catch(function (error) {
         app.dialog.close();
@@ -126,8 +121,8 @@ function signIn() {
         closeTimeout: 2000,
       })
       .open();
-  }
-}
+  };
+};
 if (window.matchMedia('(display-mode: standalone)').matches) {
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
