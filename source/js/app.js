@@ -143,16 +143,16 @@ if (window.matchMedia('(display-mode: standalone)').matches) {
         switch (loggedDept) {
           case "amb":
             getAmbData(user.uid)
-            document.getElementById("userNameA").innerText = localStorage.getItem('userNameA');
-            document.getElementById("userBranchA").innerText = localStorage.getItem('userBranchA');
-            document.getElementById("vehicleNumber").innerText = localStorage.getItem('vehicleNumber');
-            document.getElementById("userEmailA").innerText = user.email;
+            document.getElementById("userNameA").innerHTML = localStorage.getItem('userNameA');
+            document.getElementById("userBranchA").innerHTML = localStorage.getItem('userBranchA');
+            document.getElementById("vehicleNumber").innerHTML = localStorage.getItem('vehicleNumber');
+            document.getElementById("userEmailA").innerHTML = user.email;
             break;
           case "pol":
             getPolData(user.uid)
-            document.getElementById("userNameP").innerText = localStorage.getItem('userNameP');
-            document.getElementById("userBranchP").innerText = localStorage.getItem('userBranchP');
-            document.getElementById("userEmailP").innerText = user.email;
+            document.getElementById("userNameP").innerHTML = localStorage.getItem('userNameP');
+            document.getElementById("userBranchP").innerHTML = localStorage.getItem('userBranchP');
+            document.getElementById("userEmailP").innerHTML = user.email;
             break;
         }
         //todo set ambulance and police
