@@ -1,11 +1,11 @@
-var $$ = Dom7,
-    app = new Framework7({
-        id: "ambulancetracker",
-        root: "#app",
-        theme: "md",
-        routes,
-        routes,
-    });
+var $$ = Dom7;
+app = new Framework7({
+    id: "ambulancetracker",
+    root: "#app",
+    theme: "md",
+    routes,
+    routes,
+});
 var firebaseConfig = {
     apiKey: "AIzaSyD8dDiGzBMWw2JRAqdfLnHILQA0XHBFBFU",
     authDomain: "ambulancetrackerweb.firebaseapp.com",
@@ -19,7 +19,7 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 firebase.analytics();
 function getNext() {
     globalThis.swiper = document.querySelector(".swiper-container").swiper;
@@ -133,41 +133,38 @@ firebase.auth().onAuthStateChanged(function (user) {
         };
         if (window.matchMedia('(display-mode: standalone)').matches) {
             document.getElementById(localStorage.getItem("loggedDept")).click();
-        } else {
+            alert(100)
             setTimeout(() => {
-                document.getElementById('pwainstall').click();
+                switch (localStorage.getItem("loggedDept")) {
+                    case "amb":
+                        alert(50)
+                        getAmbData(user.uid)
+                        document.getElementById("userNameA").innerText = localStorage.getItem('userNameA');
+                        document.getElementById("userBranchA").innerText = localStorage.getItem('userBranchA');
+                        document.getElementById("vehicleNumber").innerText = localStorage.getItem('vehicleNumber');
+                        document.getElementById("userEmailA").innerText = user.email;
+                        break;
+                    case "pol":
+                        alert(60)
+                        getPolData(user.uid)
+                        document.getElementById("userNameP").innerText = localStorage.getItem('userNameP');
+                        document.getElementById("userBranchP").innerText = localStorage.getItem('userBranchP');
+                        document.getElementById("userEmailP").innerText = user.email;
+                        break;
+                }
             }, 2000)
+        } else {
+            document.getElementById('pwainstall').click();
         }
-        setTimeout(() => {
-            switch (loggedDept) {
-                case "amb":
-                    getAmbData(user.uid)
-                    document.getElementById("userNameA").innerHTML = localStorage.getItem('userNameA');
-                    document.getElementById("userBranchA").innerHTML = localStorage.getItem('userBranchA');
-                    document.getElementById("vehicleNumber").innerHTML = localStorage.getItem('vehicleNumber');
-                    document.getElementById("userEmailA").innerHTML = user.email;
-                    break;
-                case "pol":
-                    getPolData(user.uid)
-                    document.getElementById("userNameP").innerHTML = localStorage.getItem('userNameP');
-                    document.getElementById("userBranchP").innerHTML = localStorage.getItem('userBranchP');
-                    document.getElementById("userEmailP").innerHTML = user.email;
-                    break;
-            }
-            //todo set ambulance and police
-            //document.getElementById("userNameP").innerText = "ABCD";
-        }, 1500)
     }
     // ...
     else {
         // User is signed out.
         // ...
         if (window.matchMedia('(display-mode: standalone)').matches) {
-            document.getElementById(localStorage.getItem("log")).click();
+            document.getElementById("log").click();
         } else {
-            setTimeout(() => {
-                document.getElementById('pwainstall').click();
-            }, 2000)
+            document.getElementById('pwainstall').click();
         }
     };
 });
@@ -218,7 +215,6 @@ function sendDataAmb(x) {
 function recieveDataPolice(x) {
     x
 }
-window.addEventListener('appinstalled', (evt) => {
-    alert('App has been added/installed on your device please launch app from your launcher!!');
-    location.reload();
+window.matchMedia('(display-mode: standalone)').addEventListener('change', (evt) => {
+    location.reload()
 });
