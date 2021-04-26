@@ -42,26 +42,32 @@ function setDept(userDept) {
     swiper.slideNext();
 }
 function getPolData(uid) {
-    const query = db
-        .collection("users")
-        .doc("police")
-        .collection("accounts")
-        .doc(uid);
-    query
-        .get()
-        .then((doc) => {
-            if (doc.exists) {
-                policeData = doc.data();
-                localStorage.setItem("userNameP", policeData.userName);
-                localStorage.setItem("userBranchP", policeData.userBranch);
-            } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!");
-            }
-        })
-        .catch((error) => {
-            console.log("Error getting document:", error);
-        });
+  //  if (localStorage.getItem("userSynced") == "true") {
+   //     break;
+   // }
+    //else {
+        const query = db
+            .collection("users")
+            .doc("police")
+            .collection("accounts")
+            .doc(uid);
+        query
+            .get()
+            .then((doc) => {
+                if (doc.exists) {
+                    policeData = doc.data();
+                    localStorage.setItem("userNameP", policeData.userName);
+                    localStorage.setItem("userBranchP", policeData.userBranch);
+                    localStorage.setItem("userSynced", 'true');
+                } else {
+                    // doc.data() will be undefined in this case
+                    console.log("No such document!");
+                }
+            })
+            .catch((error) => {
+                console.log("Error getting document:", error);
+            });
+  //  }
 }
 function getAmbData(uid) {
     const query = db
@@ -77,7 +83,6 @@ function getAmbData(uid) {
                 localStorage.setItem("userNameA", ambulanceData.userName);
                 localStorage.setItem("userBranchA", ambulanceData.userBranch);
                 localStorage.setItem("vehicleNumber", ambulanceData.vehicleNumber);
-
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
@@ -88,7 +93,6 @@ function getAmbData(uid) {
         });
 }
 function signIn() {
-    //const emID = document.getElementById("emID")
     document.getElementById("login-form");
     if (app.input.validateInputs(document.getElementById("login-form"))) {
         app.dialog.preloader("Signing In...");
@@ -102,6 +106,7 @@ function signIn() {
             .catch(function (error) {
                 app.dialog.close();
                 // Handle Errors here.
+
                 if (error.code == "auth/network-request-failed") {
                     var errorMsg = "Network error! Please check your connection.";
                 } else {
@@ -121,9 +126,8 @@ function signIn() {
                 closeTimeout: 2000,
             })
             .open();
-    };
-};
-
+    }
+}
 
 firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
@@ -131,44 +135,52 @@ firebase.auth().onAuthStateChanged(function (user) {
             document.getElementById("resetloginform").click();
             app.dialog.close();
         };
-        if (window.matchMedia('(display-mode: standalone)').matches) {
+        if (window.matchMedia("(display-mode: standalone)").matches) {
             document.getElementById(localStorage.getItem("loggedDept")).click();
             setTimeout(() => {
                 switch (localStorage.getItem("loggedDept")) {
                     case "amb":
-                        getAmbData(user.uid)
-                        document.getElementById("userNameA").innerText = localStorage.getItem('userNameA');
-                        document.getElementById("userBranchA").innerText = localStorage.getItem('userBranchA');
-                        document.getElementById("vehicleNumber").innerText = localStorage.getItem('vehicleNumber');
+                        getAmbData(user.uid);
+                        document.getElementById(
+                            "userNameA"
+                        ).innerText = localStorage.getItem("userNameA");
+                        document.getElementById(
+                            "userBranchA"
+                        ).innerText = localStorage.getItem("userBranchA");
+                        document.getElementById(
+                            "vehicleNumber"
+                        ).innerText = localStorage.getItem("vehicleNumber");
                         document.getElementById("userEmailA").innerText = user.email;
                         break;
                     case "pol":
-                        getPolData(user.uid)
-                        document.getElementById("userNameP").innerText = localStorage.getItem('userNameP');
-                        document.getElementById("userBranchP").innerText = localStorage.getItem('userBranchP');
+                        getPolData(user.uid);
+                        document.getElementById(
+                            "userNameP"
+                        ).innerText = localStorage.getItem("userNameP");
+                        document.getElementById(
+                            "userBranchP"
+                        ).innerText = localStorage.getItem("userBranchP");
                         document.getElementById("userEmailP").innerText = user.email;
-                        break;
                 }
-            }, 2000)
+            }, 2000);
         } else {
-            document.getElementById('pwainstall').click();
+            document.getElementById("pwainstall").click();
         }
     }
     // ...
     else {
         // User is signed out.
         // ...
-        if (window.matchMedia('(display-mode: standalone)').matches) {
+        if (window.matchMedia("(display-mode: standalone)").matches) {
             document.getElementById("log").click();
         } else {
-            document.getElementById('pwainstall').click();
+            document.getElementById("pwainstall").click();
         }
-    };
+    }
 });
 
-
 function signUsrOut() {
-    localStorage.clear()
+    localStorage.clear();
     firebase
         .auth()
         .signOut()
@@ -207,11 +219,13 @@ function getmap() {
     );
 }
 function sendDataAmb(x) {
-    x
+    x;
 }
 function recieveDataPolice(x) {
-    x
+    x;
 }
-window.matchMedia('(display-mode: standalone)').addEventListener('change', (evt) => {
-    location.reload()
-});
+window
+    .matchMedia("(display-mode: standalone)")
+    .addEventListener("change", (evt) => {
+        location.reload();
+    });

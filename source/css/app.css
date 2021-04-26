@@ -1,5 +1,7 @@
 /* Your app custom styles here */
-
+.body {
+    user-select: none;
+}
 /*App login*/
 
 /* App intro*/
