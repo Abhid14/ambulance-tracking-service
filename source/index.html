@@ -18,15 +18,6 @@
     <link rel="stylesheet" href="./css/app.css" />
     <link rel="stylesheet" href="./css/icons.css" />
     <link href="./css/mapbox-gl.css" rel="stylesheet" />
-    <script>
-        // Check that service workers are registered
-        if ("serviceWorker" in navigator) {
-            // Use the window load event to keep the page load performant
-            window.addEventListener("load", () => {
-                navigator.serviceWorker.register("/sw.js");
-            });
-        }
-    </script>
 </head>
 
 <body>

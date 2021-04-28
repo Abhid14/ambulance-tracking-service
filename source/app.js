@@ -20,7 +20,7 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-//firebase.analytics();
+firebase.analytics();
 function getNext() {
     globalThis.swiper = document.querySelector(".swiper-container").swiper;
     swiper.allowTouchMove = false;
@@ -57,9 +57,7 @@ function getPolData(uid) {
                 localStorage.setItem("userSynced", "true");
             } else {
                 // doc.data() will be undefined in this case
-                app.dialog.alert(
-                    "User data doesn't exists / missing from the server please contact your administrator!"
-                );
+                app.dialog.alert("User data doesn't exists / missing from the server please contact your administrator!");
             }
         })
         .catch((error) => {
@@ -84,9 +82,7 @@ function getAmbData(uid) {
                 localStorage.setItem("vehicleNumber", ambulanceData.vehicleNumber);
             } else {
                 // doc.data() will be undefined in this case
-                app.dialog.alert(
-                    "User data doesn't exists / missing from the server please contact your administrator!"
-                );
+                app.dialog.alert("User data doesn't exists / missing from the server please contact your administrator!");
             }
         })
         .catch((error) => {
@@ -140,7 +136,7 @@ firebase.auth().onAuthStateChanged(function (user) {
             setTimeout(() => {
                 switch (localStorage.getItem("loggedDept")) {
                     case "amb":
-                        //getAmbData(user.uid);
+                        getAmbData(user.uid);
                         document.getElementById(
                             "userNameA"
                         ).innerText = localStorage.getItem("userNameA");
@@ -153,7 +149,7 @@ firebase.auth().onAuthStateChanged(function (user) {
                         document.getElementById("userEmailA").innerText = user.email;
                         break;
                     case "pol":
-                        //getPolData(user.uid);
+                        getPolData(user.uid);
                         document.getElementById(
                             "userNameP"
                         ).innerText = localStorage.getItem("userNameP");
@@ -164,7 +160,7 @@ firebase.auth().onAuthStateChanged(function (user) {
                 }
             }, 2000);
         } else {
-            document.getElementById("pol").click();
+            document.getElementById("pwainstall").click();
         }
     }
     // ...
@@ -174,7 +170,7 @@ firebase.auth().onAuthStateChanged(function (user) {
         if (window.matchMedia("(display-mode: standalone)").matches) {
             document.getElementById("log").click();
         } else {
-            document.getElementById("pol").click();
+            document.getElementById("pwainstall").click();
         }
     }
 });
@@ -220,14 +216,16 @@ function getmap() {
 }
 function stopDataAmb() {
     runningops = false;
-    db.collection("runningops").doc(userUID).delete();
-    document.getElementById("startTripN").classList.add("hideMapEL");
+    db.collection("runningops")
+        .doc(userUID)
+        .delete()
+    document.getElementById("startTripN").classList.add("startTripN");
     document.getElementById("startTripB").onclick = "startDataAmb()";
     document.getElementById("startTripB").classList.add("sheet-open");
     document.getElementById("startTripT").innerText = "START";
 }
 function sendDataAmb() {
-    globalThis.userUID = localStorage.getItem("userUID");
+    globalThis.userUID = localStorage.getItem("userUID")
     globalThis.runningops = true;
     if (app.input.validateInputs(document.getElementById("start-trip-form"))) {
         var startformData = app.form.convertToData("#start-trip-form");
@@ -255,9 +253,7 @@ function sendDataAmb() {
                     }
                 }
                 function rtlerror(err) {
-                    app.dialog.alert(
-                        "Error logging data to server please check internet connection/ contact admin."
-                    );
+                    app.dialog.alert("Error logging data to server please check internet connection/ contact admin.")
                 }
                 var rtl, rtloptions;
                 options = {
@@ -273,6 +269,7 @@ function sendDataAmb() {
             })
             .catch((error) => {
                 // console.error("Error writing document: ", error);
+                ;
             });
         document.getElementById("startTripB").classList.remove("sheet-open");
         document.getElementById("startTripT").innerText = "STOP";
@@ -280,8 +277,8 @@ function sendDataAmb() {
             .getElementById("startTripB")
             .setAttribute("onclick", "stopDataAmb()");
         document.getElementById("resetstartform").click();
-        app.sheet.close(".amb-sheet");
-        document.getElementById("startTripN").classList.remove("hideMapEL");
+        app.sheet.close(".start-sheet");
+        document.getElementById("startTripN").classList.remove("startTripN");
     } else {
         app.toast
             .create({
@@ -291,36 +288,17 @@ function sendDataAmb() {
             .open();
     }
 }
-function recieveOPSData() {
-    while (true) {
-        db.collection("runningops")
-            .get()
-            .then((querySnapshot) => {
-                const documents = querySnapshot.docs.map((doc) => doc.data());
-                // do something with documents
-                console.log(documents);
-            });
-    }
+function recieveDataPolice(x) {
+    x;
 }
 window
     .matchMedia("(display-mode: standalone)")
     .addEventListener("change", (evt) => {
         location.reload();
     });
-function getDeptMap(dept) {
-    function hideMapEL(dept) {
-        alert("fcuk")
-        alert("k")
-        if (dept == "amb") {
-            document.getElementById("startTripB").classList.remove("hideMapEl");
-        } else {
-            document.getElementById("nearPolB").classList.remove("hideMapEl");
-            document.getElementById("nearPolL").classList.remove("hideMapEl");
-            recieveOPSData();
-        }
-        alert(dept);
-    }
-    function showPosition() {
+
+function getAmbMap() {
+    function showPosition(position) {
         mapboxgl.accessToken =
             "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
         var map = new mapboxgl.Map({
@@ -338,12 +316,10 @@ function getDeptMap(dept) {
                 trackUserLocation: true,
             })
         );
-        map.once("load", function (dept) {
-            //document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
-            hideMapEL(dept)
-
+        map.once("load", function () {
+            document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
+            document.getElementById("startTripB").classList.remove("startTripB");
         });
-        //alert(1)
     }
     function errorCallback(error) {
         if (error.code == error.PERMISSION_DENIED) {

@@ -14,9 +14,18 @@
 
       <div id="map" class="myMap" style="position:relative;width:100%;height:100%; text-align: center;">
         <button style="font-size: x-large;" class="button-large button-raised button-fill button"
-          onclick="getAmbMap()">Load Map</button>
+          onclick="getDeptMap('amb')">Load Map</button>
       </div>
-      <div class="sheet-modal start-sheet">
+      <div id="startTripB" style="font-size: larger;"
+        class="hideMapEl color-red sheet-open fab fab-extended fab-center-bottom color-red" data-sheet="
+        .amb-sheet">
+        <a href="#">
+          <div id="startTripT" class="fab-text">Start</div>
+        </a>
+      </div>
+      <div id="startTripN" class="hideMapEl flash fab fab-right-bottom color-blue"><a href=""><i
+            class="icon material-icons md-only">navigation</i></a></div>
+      <div class="sheet-modal amb-sheet">
         <div class="toolbar">
           <div class="toolbar-inner">
             <div class="left">
@@ -67,14 +76,6 @@
           </div>
         </div>
       </div>
-      <div id="startTripB" style="font-size: larger;"
-        class="startTripB color-red sheet-open fab fab-extended fab-center-bottom color-red" data-sheet="
-        .start-sheet">
-        <a href="#">
-          <div id="startTripT" class="fab-text">Start</div>
-        </a>
-      </div>
-      <div id="startTripN" class="startTripN flash fab fab-right-bottom color-blue"><a href=""><i class="icon material-icons md-only">navigation</i></a></div>
     </div>
     <div id="amb-prof" class="page-content tab">
       <div class="view usrProf">

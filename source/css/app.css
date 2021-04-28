@@ -104,11 +104,7 @@
     }
 }
 
-.startTripB {
-    display: none;
-}
-
-.startTripN {
+.hideMapEl {
     display: none;
 }
 
@@ -120,14 +116,14 @@
 @keyframes pulset {
     0% {
         transform: scale(.95);
-        box-shadow: 0 0 0 8 rgba(34, 11, 236, 0.082)
+        box-shadow: 0 0 0 20 rgba(7, 238, 57, 0.082)
     }
     70% {
         transform: scale(1);
-        box-shadow: 0 0 0 20px rgba(45, 11, 236, 0.233)
+        box-shadow: 0 0 0 20px rgba(13, 226, 6, 0.233)
     }
     100% {
         transform: scale(.95);
-        box-shadow: 0 0 0 8 rgba(26, 11, 236, 0.233)
+        box-shadow: 0 0 0 20 rgba(36, 199, 3, 0.877)
     }
 }
