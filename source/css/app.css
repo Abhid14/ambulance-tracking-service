@@ -1,7 +1,9 @@
 /* Your app custom styles here */
+
 .body {
     user-select: none;
 }
+
 /*App login*/
 
 /* App intro*/
@@ -99,5 +101,33 @@
     100% {
         transform: scale(.95);
         box-shadow: 0 0 0 8 rgba(11, 236, 180, .233)
+    }
+}
+
+.startTripB {
+    display: none;
+}
+
+.startTripN {
+    display: none;
+}
+
+.flash {
+    border-radius: 50%;
+    animation: pulset 2s infinite
+}
+
+@keyframes pulset {
+    0% {
+        transform: scale(.95);
+        box-shadow: 0 0 0 8 rgba(34, 11, 236, 0.082)
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 20px rgba(45, 11, 236, 0.233)
+    }
+    100% {
+        transform: scale(.95);
+        box-shadow: 0 0 0 8 rgba(26, 11, 236, 0.233)
     }
 }
