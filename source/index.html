@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="./css/app.css" />
     <link rel="stylesheet" href="./css/icons.css" />
     <link href="./css/mapbox-gl.css" rel="stylesheet" />
-    <!--script>
+    <script>
         // Check that service workers are registered
         if ("serviceWorker" in navigator) {
             // Use the window load event to keep the page load performant
@@ -26,7 +26,7 @@
                 navigator.serviceWorker.register("/sw.js");
             });
         }
-    </script-->
+    </script>
 </head>
 
 <body>
@@ -49,11 +49,6 @@
     <script defer src="./js/firebase/firebase-auth.js"></script>
     <script defer src="./js/firebase/firebase-firestore.js"></script>
     <script defer src="./js/app.js"></script>
-    <script type="module">
-        import * as Comlink from "./js/modules/comlink.min.mjs"
-        globalThis.worker = new Worker("./js/worker.js");
-        globalThis.remoteFunction = Comlink.wrap(worker);
-    </script>
 </body>
 
 </html>

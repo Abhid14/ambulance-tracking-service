@@ -1,4 +1,4 @@
- //"./modules/comlink.min.mjs";
+//"./modules/comlink.min.mjs";
 var $$ = Dom7;
 app = new Framework7({
   id: "ambulancetracker",
@@ -166,7 +166,7 @@ firebase.auth().onAuthStateChanged(function (user) {
         }
       }, 2000);
     } else {
-      document.getElementById("pol").click();
+      document.getElementById("log").click();
     }
   }
   // ...
@@ -174,9 +174,9 @@ firebase.auth().onAuthStateChanged(function (user) {
     // User is signed out.
     // ...
     if (window.matchMedia("(display-mode: standalone)").matches) {
-      document.getElementById("pol").click();
+      document.getElementById("log").click();
     } else {
-      document.getElementById("pol").click();
+      document.getElementById("pwainstall").click();
     }
   }
 });
@@ -330,27 +330,30 @@ function recieveOPSData() {
     // events will fire here everytime data changes
     // asynchronously hence we take all data here and process it for
     // adding pointers to map.
-    renderOPSData(rtlLoc);
+    computeOPSData(rtlLoc);
   });
 }
-function renderOPSData(rtlLoc) {
-  //import * as Comlink from "./modules/comlink.min.mjs" //"./modules/comlink.min.mjs";
-  // import * as Comlink from "../../../dist/esm/comlink.mjs";
 
-  async function init() {
-    // WebWorkers use `postMessage` and therefore work with Comlink.
-
-    alert(`Counter: ${await remoteFunction.counter}`);
-    await remoteFunction.inc();
-    alert(`Counter: ${await remoteFunction.counter}`);
-    alert(await remoteFunction.abc());
+function sortDistance(a, b, rtlLoc) {
+  rtlLoc.forEach(uid);
+  function uid(dis) {
+    console.log(dis.id, dis.random);
   }
-  init();
-  $$(".myclass").on("click", function () {
-    alert(this.id);
-    //$$(this).addClass('hello').attr('title', 'world').insertAfter('.something-else');
-  });
+
 }
+function computeOPSData(rtlLoc) {
+  navigator.geolocation.getCurrentPosition((pos) => {
+    sortDistance(pos.coords.latitude, pos.coords.longitude, rtlLoc)
+  });
+
+
+}
+/*
+$$(".myclass").on("click", function () {
+  alert(this.id);
+  //$$(this).addClass('hello').attr('title', 'world').insertAfter('.something-else');
+});*/
+
 function getPolMap() {
   mapboxgl.accessToken =
     "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
