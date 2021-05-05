@@ -1,4 +1,3 @@
-//"./modules/comlink.min.mjs";
 var $$ = Dom7;
 app = new Framework7({
   id: "ambulancetracker",
@@ -84,6 +83,7 @@ function getAmbData(uid) {
         localStorage.setItem("userNameA", ambulanceData.userName);
         localStorage.setItem("userBranchA", ambulanceData.userBranch);
         localStorage.setItem("vehicleNumber", ambulanceData.vehicleNumber);
+        localStorage.setItem("phoneNumber", ambulanceData.phoneNumber);
       } else {
         // doc.data() will be undefined in this case
         app.dialog.alert(
@@ -130,7 +130,6 @@ function signIn() {
       .open();
   }
 }
-
 firebase.auth().onAuthStateChanged(function (user) {
   if (user) {
     if (document.getElementById("resetloginform")) {
@@ -180,7 +179,6 @@ firebase.auth().onAuthStateChanged(function (user) {
     }
   }
 });
-
 function signUsrOut() {
   localStorage.clear();
   firebase
@@ -213,49 +211,59 @@ function sendDataAmb() {
   globalThis.runningops = true;
   if (app.input.validateInputs(document.getElementById("start-trip-form"))) {
     var startformData = app.form.convertToData("#start-trip-form");
-    db.collection("runningops")
-      .doc(userUID)
-      .set({
-        userName: localStorage.getItem("userNameA"),
-        vehicleNumber: localStorage.getItem("vehicleNumber"),
-        destination: startformData.destination,
-        priority: startformData.priority,
-      })
-      .then(() => {
-        console.log("Document successfully written to uid!");
-        function rtlsuccess(pos) {
-          if (runningops == true) {
-            var rtlcrd = pos.coords;
-            db.collection("runningops")
-              .doc(userUID)
-              .update({
-                userLocation: new firebase.firestore.GeoPoint(
-                  rtlcrd.latitude,
-                  rtlcrd.longitude
-                ),
-              });
+    navigator.geolocation.getCurrentPosition((pos) => {
+      var lat = pos.coords.latitude;
+      var lon = pos.coords.longitude;
+      db.collection("runningops").doc(userUID).delete();
+      db.collection("runningops")
+        .doc(userUID)
+        .set({
+          userName: localStorage.getItem("userNameA"),
+          vehicleNumber: localStorage.getItem("vehicleNumber"),
+          destination: startformData.destination,
+          priority: Number(startformData.priority),
+          userLocation: new firebase.firestore.GeoPoint(lat, lon),
+          phoneNumber: localStorage.getItem("phoneNumber")
+        })
+        .then(() => {
+          console.log("Document successfully written to uid!");
+          function rtlsuccess(pos) {
+            if (runningops == true) {
+              var rtlcrd = pos.coords;
+              setTimeout(function () {
+                db.collection("runningops")
+                  .doc(userUID)
+                  .update({
+                    userLocation: new firebase.firestore.GeoPoint(
+                      rtlcrd.latitude,
+                      rtlcrd.longitude
+                    ),
+                  });
+              }, 3500);
+            }
           }
-        }
-        function rtlerror(err) {
-          app.dialog.alert(
-            "Error logging data to server please check internet connection/ contact admin."
+          function rtlerror(err) {
+            app.dialog.alert(
+              "Error logging data to server please check internet connection/ contact admin."
+            );
+          }
+          var rtl, rtloptions;
+          options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0,
+          };
+          rtl = navigator.geolocation.watchPosition(
+            rtlsuccess,
+            rtlerror,
+            rtloptions
           );
-        }
-        var rtl, rtloptions;
-        options = {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0,
-        };
-        rtl = navigator.geolocation.watchPosition(
-          rtlsuccess,
-          rtlerror,
-          rtloptions
-        );
-      })
-      .catch((error) => {
-        // console.error("Error writing document: ", error);
-      });
+        })
+        .catch((error) => {
+          // console.error("Error writing document: ", error);
+        });
+    });
+
     document.getElementById("startTripB").classList.remove("sheet-open");
     document.getElementById("startTripT").innerText = "STOP";
     document
@@ -273,12 +281,243 @@ function sendDataAmb() {
       .open();
   }
 }
-window
-  .matchMedia("(display-mode: standalone)")
-  .addEventListener("change", (evt) => {
-    location.reload();
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
+}
+function sortDistance(lat1, lon1, lat2, lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2 - lat1); // deg2rad below
+  var dLon = deg2rad(lon2 - lon1);
+  var a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+    Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  var d = R * c; // Distance in km
+  if (d < 4) {
+    return true;
+  } else {
+    return false;
+  }
+}
+function addAmbList(lat1, lon1, usrDet) {
+  window.cb = usrDet;
+  if (sortDistance(lat1, lon1, usrDet[5], usrDet[6]) === true) {
+    window.ambList.push(usrDet);
+    addDetUI(usrDet);
+  }
+  if (window.runOPSListStat == 0) {
+    window.runOPSListStat = 1;
+    window.nearPolL.classList.add("sheet-open", "color-orange");
+  }
+}
+function folUsr(id) {
+  function checkUIDToFol(Data) {
+    if (Data[0] == id) {
+      return Data;
+    } else {
+      return false;
+    }
+  }
+  var ix = window.ambList.findIndex(checkUIDToFol);
+  app.sheet.close(".pol-sheet");
+  window.map.flyTo({
+    center: [
+      window.ambList[ix][6],
+      window.ambList[ix][5]
+    ],
+    essential: true // this animation is considered essential with respect to prefers-reduced-motion
   });
+}
+function addDetUI(usrDet) {
+  window.nearPolT.innerText = `${window.ambList.length} Running OPS`;
+  let runLi = document.createElement("li");
+  switch (usrDet[4]) {
+    case 1:
+      var pty = "color-yellow"
+      var pColor = "#ffff00"
+      break;
+    case 2:
+      var pty = "color-orange"
+      var pColor = "#ffa500"
+      break;
+    case 3:
+      var pty = "color-red"
+      var pColor = "#ff0000"
+      break;
+    case 4:
+      var pty = "color-green"
+      var pColor = "#33cc33"
+      break;
+  }
+  runLi.innerHTML = `<a id="${usrDet[0]}" class="runOPSItem item-link item-content">
+  <div class="item-inner">
+    <div class="item-title-row">
+      <div class="item-title">${usrDet[1]}</div>
+      <div class="item-after"><span class="badge ${pty}">${usrDet[4]}</span></div>
+    </div>
+    <div class="item-subtitle">${usrDet[2]}</div>
+    <div class="item-subtitle">${usrDet[3]}</div>
+    <div class="item-subtitle" >${usrDet[7]}</div>
+  </div>
+</a>`;
+  $$(".runOPSCont").append(runLi);
+  $$(".runOPSItem").on("click", function () {
+    folUsr(this.id);
+  });
+  eval(
+    usrDet[0] +
+    "= new mapboxgl.Marker({color: '" + pColor + "',}).setLngLat([" +
+    usrDet[6] +
+    ", " +
+    usrDet[5] +
+    "]).addTo(window.map);"
+  );
+  if (pty == "color-green") {
+    app.dialog.alert("A Green corridor vehicle has been detected in your 4 km range!", "Important Alert!")
+  }
+}
+function updateMarker(ix) {
+  switch (window.ambList[ix][4]) {
+    case 1:
+      var pColor = "#ffff00"
+      break;
+    case 2:
+      var pColor = "#ffa500"
+      break;
+    case 3:
+      var pColor = "#ff0000"
+      break;
+    case 4:
+      var pColor = "#33cc33"
+      break;
+  }
+  var exC1 = (window.ambList[ix][0] + ".remove();").toString();
+  var exC2 = (
+    window.ambList[ix][0] +
+    "= new mapboxgl.Marker({color: '" + pColor + "',}).setLngLat([" +
+    window.ambList[ix][6] +
+    ", " +
+    window.ambList[ix][5] +
+    "]).addTo(window.map);"
+  ).toString();
+  eval(exC1);
+  eval(exC2);
+}
 
+function recieveOPSData() {
+  ambList = [];
+  runOPSListStat = 0;
+
+  db.collection("runningops").onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added") {
+        var usrDet = [
+          change.doc.id,
+          change.doc.data().userName,
+          change.doc.data().vehicleNumber,
+          change.doc.data().destination,
+          change.doc.data().priority,
+          change.doc.data().userLocation.latitude,
+          change.doc.data().userLocation.longitude,
+          change.doc.data().phoneNumber
+        ];
+        navigator.geolocation.getCurrentPosition((pos) => {
+          addAmbList(pos.coords.latitude, pos.coords.longitude, usrDet);
+        });
+      }
+      if (change.type === "modified") {
+        function checkUID(Data) {
+          if (Data[0] == change.doc.id) {
+            return Data;
+          } else {
+            return false;
+          }
+        }
+        if (window.ambList.length > 0) {
+          try {
+            var changeIndex = window.ambList.findIndex(checkUID);
+            if (typeof changeIndex === "number") {
+              window.ambList[
+                changeIndex
+              ][5] = change.doc.data().userLocation.latitude;
+              window.ambList[
+                changeIndex
+              ][6] = change.doc.data().userLocation.longitude;
+              updateMarker(changeIndex);
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+      if (change.type === "removed") {
+        function checkUIDToDel(Data) {
+          if (Data[0] == change.doc.id) {
+            return Data;
+          } else {
+            return false;
+          }
+        }
+        if (window.ambList.length > 0) {
+          try {
+            var changeIndex = window.ambList.findIndex(checkUIDToDel);
+            if (typeof changeIndex === "number") {
+              window.ambList.splice(changeIndex, 1);
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        }
+        if (window.ambList.length == 0) {
+          window.runOPSListStat = 0;
+          window.nearPolT.innerText = "No Running OPS";
+          window.nearPolL.classList.remove("sheet-open", "color-orange");
+          window.nearPolL.classList.add("color-green");
+          var exC1 = (change.doc.id + ".remove();").toString();
+          document.getElementById(change.doc.id).remove();
+          eval(exC1);
+        } else {
+          window.nearPolT.innerText = `${window.ambList.length} Running OPS`;
+          var exC1 = (change.doc.id + ".remove();").toString();
+          document.getElementById(change.doc.id).remove();
+          eval(exC1);
+        }
+      }
+    });
+  });
+}
+function getPolMap() {
+  mapboxgl.accessToken =
+    "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
+  map = new mapboxgl.Map({
+    container: "map", // container id
+    style: "mapbox://styles/mapbox/streets-v11", // style URL
+    center: [78.31332119498711, 21.80992239473943], // starting position [lng, lat]
+    zoom: 3, // starting zoom
+  });
+  // Add geolocate control to the map.
+  map.addControl(
+    new mapboxgl.GeolocateControl({
+      positionOptions: {
+        enableHighAccuracy: true,
+      },
+      trackUserLocation: true,
+    })
+  );
+  // to add scale if requiredmap.addControl(new mapboxgl.ScaleControl({ position: "bottom-right" }));
+
+  map.once("load", function () {
+    document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
+    document.getElementById("nearPolL").classList.remove("hideMapEl");
+    document.getElementById("nearPolB").classList.remove("hideMapEl");
+    nearPolL = document.getElementById("nearPolL");
+    nearPolT = document.getElementById("nearPolT");
+    recieveOPSData();
+  });
+}
 function getAmbMap() {
   function showPosition(position) {
     mapboxgl.accessToken =
@@ -321,63 +560,8 @@ function getAmbMap() {
     );
   }
 }
-function recieveOPSData() {
-  const rtlLocEvents = firebase.firestore().collection("runningops");
-  rtlLocEvents.onSnapshot((querySnapshot) => {
-    globalThis.rtlLoc = querySnapshot.docs.map((doc) => {
-      return { id: doc.id, ...doc.data() };
-    });
-    // events will fire here everytime data changes
-    // asynchronously hence we take all data here and process it for
-    // adding pointers to map.
-    computeOPSData(rtlLoc);
+window
+  .matchMedia("(display-mode: standalone)")
+  .addEventListener("change", (evt) => {
+    location.reload();
   });
-}
-
-function sortDistance(a, b, rtlLoc) {
-  rtlLoc.forEach(uid);
-  function uid(dis) {
-    console.log(dis.id, dis.random);
-  }
-
-}
-function computeOPSData(rtlLoc) {
-  navigator.geolocation.getCurrentPosition((pos) => {
-    sortDistance(pos.coords.latitude, pos.coords.longitude, rtlLoc)
-  });
-
-
-}
-/*
-$$(".myclass").on("click", function () {
-  alert(this.id);
-  //$$(this).addClass('hello').attr('title', 'world').insertAfter('.something-else');
-});*/
-
-function getPolMap() {
-  mapboxgl.accessToken =
-    "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
-  var map = new mapboxgl.Map({
-    container: "map", // container id
-    style: "mapbox://styles/mapbox/streets-v11", // style URL
-    center: [78.31332119498711, 21.80992239473943], // starting position [lng, lat]
-    zoom: 3, // starting zoom
-  });
-  // Add geolocate control to the map.
-  map.addControl(
-    new mapboxgl.GeolocateControl({
-      positionOptions: {
-        enableHighAccuracy: true,
-      },
-      trackUserLocation: true,
-    })
-  );
-  map.addControl(new mapboxgl.ScaleControl({ position: "bottom-right" }));
-
-  map.once("load", function () {
-    document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
-    document.getElementById("nearPolL").classList.remove("hideMapEl");
-    document.getElementById("nearPolB").classList.remove("hideMapEl");
-    recieveOPSData();
-  });
-}
