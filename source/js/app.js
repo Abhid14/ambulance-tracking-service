@@ -175,6 +175,7 @@ firebase.auth().onAuthStateChanged(function (user) {
     }
   } else {
     if (window.matchMedia("(display-mode: standalone)").matches) {
+      appHasBeenOpened = true;
       document.getElementById("log").click();
     } else {
       document.getElementById("pwainstall").click();
@@ -565,7 +566,7 @@ function getPolMap() {
 window
 .matchMedia("(display-mode: standalone)")
 .addEventListener("change", (evt) => {
-  if (appHasBeenOpened != true) {
+  if (appHasBeenOpened) {
     location.reload(); // bhuilt in html method to reload page
   }
 });
