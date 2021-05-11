@@ -232,14 +232,16 @@ function sendDataAmb() {
           function rtlsuccess(pos) {
             if (runningops == true) {
               var rtlcrd = pos.coords;
-              db.collection("runningops")
-                .doc(userUID)
-                .update({
-                  userLocation: new firebase.firestore.GeoPoint(
-                    rtlcrd.latitude,
-                    rtlcrd.longitude
-                  ),
-                });
+              setTimeout(function () {
+                db.collection("runningops")
+                  .doc(userUID)
+                  .update({
+                    userLocation: new firebase.firestore.GeoPoint(
+                      rtlcrd.latitude,
+                      rtlcrd.longitude
+                    ),
+                  });
+              }, 3500);
             }
           }
           // error caLL BACK
@@ -251,7 +253,6 @@ function sendDataAmb() {
           var rtl, rtloptions;
           rtloptions = {
             enableHighAccuracy: true,
-            timeout: 3500,
             maximumAge: 0,
           };
           rtl = navigator.geolocation.watchPosition(
@@ -260,7 +261,7 @@ function sendDataAmb() {
             rtloptions // additional options
           );
         })
-        .catch((error) => {});
+        .catch((error) => { });
     });
     document.getElementById("startTripB").classList.remove("sheet-open");
     document.getElementById("startTripT").innerText = "STOP";
@@ -331,9 +332,9 @@ function sortDistance(lat1, lon1, lat2, lon2) {
   var a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   // d is the distance in kms
   var d = R * c;
@@ -400,13 +401,13 @@ function addDetUI(usrDet) {
   // we r creating markers for each ambulance
   eval(
     usrDet[0] +
-      "= new mapboxgl.Marker({color: '" +
-      pColor +
-      "',}).setLngLat([" +
-      usrDet[6] +
-      ", " +
-      usrDet[5] +
-      "]).addTo(window.map);"
+    "= new mapboxgl.Marker({color: '" +
+    pColor +
+    "',}).setLngLat([" +
+    usrDet[6] +
+    ", " +
+    usrDet[5] +
+    "]).addTo(window.map);"
   ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(window.map)
   if (pty == "color-green") {
     app.dialog.alert(
@@ -560,8 +561,8 @@ function getPolMap() {
   });
 }
 window
-.matchMedia("(display-mode: standalone)")
-.addEventListener("change", (evt) => {
+  .matchMedia("(display-mode: standalone)")
+  .addEventListener("change", (evt) => {
     location.reload(); // bhuilt in html method to reload page
-  
-});
+
+  });
