@@ -1,5 +1,5 @@
 module.exports = {
-	globDirectory: 'release/',
+	globDirectory: 'source/',
 	globPatterns: [
 		'**/*.{html,css,eot,ttf,woff,woff2,svg,js,json,png,jpg}'
 	],
@@ -7,5 +7,5 @@ module.exports = {
 		/^utm_/,
 		/^fbclid$/
 	],
-	swDest: 'release/sw.js'
+	swDest: 'source/sw.js'
 };
