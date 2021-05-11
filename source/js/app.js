@@ -173,13 +173,6 @@ firebase.auth().onAuthStateChanged(function (user) {
       // if opened from browser
       document.getElementById("pwainstall").click();
     }
-    window
-      .matchMedia("(display-mode: standalone)")
-      .addEventListener("change", (evt) => {
-        if (appHasBeenOpened != true) {
-          location.reload(); // bhuilt in html method to reload page
-        }
-      });
   } else {
     if (window.matchMedia("(display-mode: standalone)").matches) {
       document.getElementById("log").click();
@@ -569,3 +562,10 @@ function getPolMap() {
     recieveOPSData(); // call data reciever
   });
 }
+window
+.matchMedia("(display-mode: standalone)")
+.addEventListener("change", (evt) => {
+  if (appHasBeenOpened != true) {
+    location.reload(); // bhuilt in html method to reload page
+  }
+});
