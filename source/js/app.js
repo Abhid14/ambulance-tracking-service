@@ -350,10 +350,11 @@ function addAmbList(lat1, lon1, usrDet) {
     if (sortDistance(lat1, lon1, usrDet[5], usrDet[6]) === true) {
         window.ambList.push(usrDet); // add data to global array 
         addDetUI(usrDet); // this is used for updating ui
-        if (window.runOPSListStat == 0) {
-            window.runOPSListStat = 1;
-            window.nearPolL.classList.add("sheet-open", "color-orange");
-        }
+        
+    }
+    if (window.runOPSListStat == 0) {
+        window.runOPSListStat = 1;
+        window.nearPolL.classList.add("sheet-open", "color-orange");
     }
 
 }
@@ -375,7 +376,7 @@ function folUsr(id) {
 
 function addDetUI(usrDet) {
     window.nearPolT.innerText = `${window.ambList.length} Running OPS`;
-    let runLi = document.createElement("li");
+    let runLi = document.createElement("li"); // dom manipulation method
     switch (usrDet[4]) {
         case 1:
             var pty = "color-yellow";
@@ -448,6 +449,7 @@ function updateMarker(ix) {
     eval(exC1);
     eval(exC2);
 }
+
 /// data  reciever
 function recieveOPSData() {
     ambList = [];
@@ -539,7 +541,7 @@ function recieveOPSData() {
         });
     });
 }
-// when user clicks load map button
+// when user clicks load map button 1st function 
 function getPolMap() {
     mapboxgl.accessToken =
         "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
@@ -564,6 +566,10 @@ function getPolMap() {
         recieveOPSData(); // call data reciever
     });
 }
+
+
+
+
 window.matchMedia("(display-mode: standalone)").addEventListener("change", (evt) => {
     location.reload(); // bhuilt in html method to reload page
 });
