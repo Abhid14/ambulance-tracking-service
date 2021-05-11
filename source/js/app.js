@@ -401,9 +401,7 @@ function addDetUI(usrDet) {
   // we r creating markers for each ambulance
   eval(
     usrDet[0] +
-    "= new mapboxgl.Marker({color: '" +
-    pColor +
-    "',}).setLngLat([" +
+    "= new mapboxgl.Marker().setLngLat([" +
     usrDet[6] +
     ", " +
     usrDet[5] +
@@ -434,9 +432,7 @@ function updateMarker(ix) {
   var exC1 = (window.ambList[ix][0] + ".remove();").toString();
   var exC2 = (
     window.ambList[ix][0] +
-    "= new mapboxgl.Marker({color: '" +
-    pColor +
-    "',}).setLngLat([" +
+    "= new mapboxgl.Marker().setLngLat([" +
     window.ambList[ix][6] +
     ", " +
     window.ambList[ix][5] +
