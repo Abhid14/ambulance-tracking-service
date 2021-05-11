@@ -141,7 +141,6 @@ firebase.auth().onAuthStateChanged(function (user) {
     }
     //  this is executed if the app is logged in
     if (window.matchMedia("(display-mode: standalone)").matches) {
-      appHasBeenOpened = true;
       document.getElementById(localStorage.getItem("loggedDept")).click();
       setTimeout(() => {
         switch (localStorage.getItem("loggedDept")) {
@@ -175,7 +174,6 @@ firebase.auth().onAuthStateChanged(function (user) {
     }
   } else {
     if (window.matchMedia("(display-mode: standalone)").matches) {
-      appHasBeenOpened = true;
       document.getElementById("log").click();
     } else {
       document.getElementById("pwainstall").click();
@@ -412,9 +410,7 @@ function addDetUI(usrDet) {
   ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(window.map)
   if (pty == "color-green") {
     app.dialog.alert(
-      "A Green corridor vehicle " +
-        userDet[2] +
-        " has been detected in your 4 km range!",
+      "A Green corridor vehicle has been detected in your 4 km range!",
       "Important Alert!"
     );
   }
@@ -566,7 +562,6 @@ function getPolMap() {
 window
 .matchMedia("(display-mode: standalone)")
 .addEventListener("change", (evt) => {
-  if (appHasBeenOpened) {
     location.reload(); // bhuilt in html method to reload page
-  }
+  
 });
