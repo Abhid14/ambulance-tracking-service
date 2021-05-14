@@ -73,7 +73,7 @@ function signUsrOut() {
     });
 }
 function getPolData(user) {
-  $$(document).on('page:afterin', '.page[data-name="police"]', function (e) {
+  $$(document).on("page:afterin", '.page[data-name="police"]', function (e) {
     // Do something here when page with data-name="police" attribute loaded and initialized
     if (localStorage.getItem("userUID") != user.uid) {
       app.dialog.preloader("Fetching Profile Data...");
@@ -90,8 +90,9 @@ function getPolData(user) {
             localStorage.setItem("userUID", user.uid);
             localStorage.setItem("userNameP", policeData.userName);
             localStorage.setItem("userBranchP", policeData.userBranch);
-            location.reload()
+            location.reload();
           } else {
+            app.dialog.close()
             app.dialog.alert(
               "User data doesn't exists / missing from the server please contact your administrator!",
               "Error",
@@ -100,22 +101,22 @@ function getPolData(user) {
           }
         })
         .catch((error) => {
-          console.log("Error getting document:", error);
+          console.log("Error getting document:", error.code);
         });
     } else {
-      document.getElementById(
+      document.getElementById("userNameP").innerText = localStorage.getItem(
         "userNameP"
-      ).innerText = localStorage.getItem("userNameP");
-      document.getElementById(
+      );
+      document.getElementById("userBranchP").innerText = localStorage.getItem(
         "userBranchP"
-      ).innerText = localStorage.getItem("userBranchP");
+      );
       document.getElementById("userEmailP").innerText = user.email;
-      getPolMap()
+      getPolMap();
     }
-  })
+  });
 }
 function getAmbData(user) {
-  $$(document).on('page:afterin', '.page[data-name="ambulance"]', function (e) {
+  $$(document).on("page:afterin", '.page[data-name="ambulance"]', function (e) {
     // Do something here when page with data-name="ambulance" attribute loaded and initialized
     if (localStorage.getItem("userUID") != user.uid) {
       app.dialog.preloader("Fetching Profile Data...");
@@ -134,8 +135,9 @@ function getAmbData(user) {
             localStorage.setItem("userBranchA", ambulanceData.userBranch);
             localStorage.setItem("vehicleNumber", ambulanceData.vehicleNumber);
             localStorage.setItem("phoneNumber", ambulanceData.phoneNumber);
-            location.reload()
+            location.reload();
           } else {
+            app.dialog.close()
             app.dialog.alert(
               "User data doesn't exists / missing from the server please contact your administrator!",
               "Error",
@@ -144,22 +146,22 @@ function getAmbData(user) {
           }
         })
         .catch((error) => {
-          console.log("Error getting document:", error);
+          console.log("Error getting document:", error.code);
         });
     } else {
-      document.getElementById(
+      document.getElementById("userNameA").innerText = localStorage.getItem(
         "userNameA"
-      ).innerText = localStorage.getItem("userNameA");
-      document.getElementById(
+      );
+      document.getElementById("userBranchA").innerText = localStorage.getItem(
         "userBranchA"
-      ).innerText = localStorage.getItem("userBranchA");
-      document.getElementById(
+      );
+      document.getElementById("vehicleNumber").innerText = localStorage.getItem(
         "vehicleNumber"
-      ).innerText = localStorage.getItem("vehicleNumber");
+      );
       document.getElementById("userEmailA").innerText = user.email;
-      getAmbMap()
+      getAmbMap();
     }
-  })
+  });
 }
 function getNext() {
   globalThis.swiper = document.querySelector(".swiper-container").swiper;
@@ -460,7 +462,7 @@ function updateMarker(ix) {
       var pColor = "#33cc33";
       break;
   }
-  var exC1 = (ambList[ix][0] + ".remove();").toString(); // UID 
+  var exC1 = (ambList[ix][0] + ".remove();").toString(); // UID
   var exC2 = (
     ambList[ix][0] +
     "= new mapboxgl.Marker({color: '" +
@@ -505,7 +507,14 @@ function removeMarker(id) {
 }
 function addAmbList(ambData, ambID) {
   navigator.geolocation.getCurrentPosition((pos) => {
-    if (sortDistance(pos.coords.latitude, pos.coords.longitude, ambData.userLocation.latitude, ambData.userLocation.longitude) === true) {
+    if (
+      sortDistance(
+        pos.coords.latitude,
+        pos.coords.longitude,
+        ambData.userLocation.latitude,
+        ambData.userLocation.longitude
+      ) === true
+    ) {
       var usrDet = [
         ambID, // At index 0 this is UID of ambulance
         ambData.userName,
@@ -545,7 +554,7 @@ function recieveOPSData() {
           if (ambList.length > 0) {
             try {
               // changeIndex will be an integer if true else will be false
-              var changeIndex = ambList.findIndex(checkUID, change.doc.id);// to find index
+              var changeIndex = ambList.findIndex(checkUID, change.doc.id); // to find index
               if (changeIndex >= 0) {
                 ambList[
                   changeIndex
@@ -553,8 +562,9 @@ function recieveOPSData() {
                 ambList[
                   changeIndex
                 ][6] = change.doc.data().userLocation.longitude;
-                updateMarker(changeIndex);//
-              } else { // here adding ambulance to our list if it suddenly enters our range
+                updateMarker(changeIndex); //
+              } else {
+                // here adding ambulance to our list if it suddenly enters our range
                 addAmbList(change.doc.data(), change.doc.id);
               }
             } catch (error) {
@@ -567,7 +577,7 @@ function recieveOPSData() {
       }
       // when removed
       if (change.type === "removed") {
-        removeMarker(change.doc.id)
+        removeMarker(change.doc.id);
       }
     });
   });

@@ -1,3 +1,5 @@
 # Ambulance Tracker
 
-An unfinished project visit in near future for a working release
+An Ambulance Tracking PWA built with Firebase, Mapbox and Framework7.
+
+Visit https://ambulancetrackerweb.web.app/
