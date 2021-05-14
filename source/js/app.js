@@ -571,7 +571,10 @@ function recieveOPSData() {
               console.log(error);
             }
           } else {
-            addAmbList(change.doc.data(), change.doc.id);
+            var dupIndex = ambList.findIndex(checkUID, change.doc.id);
+            if (dupIndex  < 0){
+              addAmbList(change.doc.data(), change.doc.id);
+            }
           }
         }
       }
