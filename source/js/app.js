@@ -6,9 +6,11 @@ app = new Framework7({
   theme: "md",
   routes,
 });
-window.matchMedia("(display-mode: standalone)").addEventListener("change", (evt) => {
-  location.reload(); // bhuilt in html method to reload page
-});
+window
+  .matchMedia("(display-mode: standalone)")
+  .addEventListener("change", (evt) => {
+    location.reload(); // bhuilt in html method to reload page
+  });
 // firebase init
 var firebaseConfig = {
   apiKey: "AIzaSyD8dDiGzBMWw2JRAqdfLnHILQA0XHBFBFU",
@@ -92,7 +94,7 @@ function getPolData(user) {
             localStorage.setItem("userBranchP", policeData.userBranch);
             location.reload();
           } else {
-            app.dialog.close()
+            app.dialog.close();
             app.dialog.alert(
               "User data doesn't exists / missing from the server please contact your administrator!",
               "Error",
@@ -137,7 +139,7 @@ function getAmbData(user) {
             localStorage.setItem("phoneNumber", ambulanceData.phoneNumber);
             location.reload();
           } else {
-            app.dialog.close()
+            app.dialog.close();
             app.dialog.alert(
               "User data doesn't exists / missing from the server please contact your administrator!",
               "Error",
@@ -279,7 +281,7 @@ function sendDataAmb() {
             rtloptions // additional options
           );
         })
-        .catch((error) => { });
+        .catch((error) => {});
     });
     document.getElementById("startTripB").classList.remove("sheet-open");
     document.getElementById("startTripT").innerText = "STOP";
@@ -356,9 +358,9 @@ function sortDistance(lat1, lon1, lat2, lon2) {
   var a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(deg2rad(lat1)) *
-    Math.cos(deg2rad(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   // d is the distance in kms
   var d = R * c;
@@ -366,6 +368,9 @@ function sortDistance(lat1, lon1, lat2, lon2) {
     return true;
   } else {
     return false;
+  }
+  if (firstSyncSuccess == false) {
+    firstSyncSuccess = true;
   }
 }
 // ui list part
@@ -432,13 +437,13 @@ function addDetUI(usrDet) {
   // we r creating markers for each ambulance
   eval(
     usrDet[0] +
-    "= new mapboxgl.Marker({color: '" +
-    pColor +
-    "',}).setLngLat([" +
-    usrDet[6] +
-    ", " +
-    usrDet[5] +
-    "]).addTo(map);"
+      "= new mapboxgl.Marker({color: '" +
+      pColor +
+      "',}).setLngLat([" +
+      usrDet[6] +
+      ", " +
+      usrDet[5] +
+      "]).addTo(map);"
   ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(map)
   if (pty == "color-green") {
     app.dialog.alert(
@@ -532,9 +537,6 @@ function addAmbList(ambData, ambID) {
         nearPolL.classList.add("sheet-open", "color-orange");
       }
     }
-    if (firstSyncSuccess == false) {
-      firstSyncSuccess = true;
-    }
   });
 }
 /// data  reciever
@@ -572,7 +574,7 @@ function recieveOPSData() {
             }
           } else {
             var dupIndex = ambList.findIndex(checkUID, change.doc.id);
-            if (dupIndex  < 0){
+            if (dupIndex != -1) {
               addAmbList(change.doc.data(), change.doc.id);
             }
           }
