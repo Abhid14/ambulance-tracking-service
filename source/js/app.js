@@ -276,7 +276,7 @@ function sendDataAmb() {
             rtloptions // additional options
           );
         })
-        .catch((error) => {});
+        .catch((error) => { });
     });
     document.getElementById("startTripB").classList.remove("sheet-open");
     document.getElementById("startTripT").innerText = "STOP";
@@ -345,28 +345,6 @@ function checkUID(usrArr) {
 }
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
-}
-function sortDistance(lat1, lon1, lat2, lon2) {
-  var R = 6371;
-  var dLat = deg2rad(lat2 - lat1);
-  var dLon = deg2rad(lon2 - lon1);
-  var a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  // d is the distance in kms
-  var d = R * c;
-  if (d < 4) {
-    return true;
-  } else {
-    return false;
-  }
-  if (firstSyncSuccess == false) {
-    firstSyncSuccess = true;
-  }
 }
 // ui list part
 // belongs to police ui
@@ -446,6 +424,25 @@ function stopFol() {
   map.removeSource("path");
 }
 
+function sortDistance(lat1, lon1, lat2, lon2) {
+  var R = 6371;
+  var dLat = deg2rad(lat2 - lat1);
+  var dLon = deg2rad(lon2 - lon1);
+  var a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+    Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  // d is the distance in kms
+  var d = R * c;
+  if (d < 4) {
+    return true;
+  } else {
+    return false;
+  }
+}
 function addDetUI(usrDet) {
   nearPolT.innerText = `${ambList.length} Running OPS`;
   var runLi = document.createElement("li"); // dom manipulation method
@@ -458,13 +455,13 @@ function addDetUI(usrDet) {
   // we r creating markers for each ambulance
   eval(
     usrDet[0] +
-      "= new mapboxgl.Marker({color: '" +
-      usrDet[8][1] +
-      "',}).setLngLat([" +
-      usrDet[6] +
-      ", " +
-      usrDet[5] +
-      "]).addTo(map);"
+    "= new mapboxgl.Marker({color: '" +
+    usrDet[8][1] +
+    "',}).setLngLat([" +
+    usrDet[6] +
+    ", " +
+    usrDet[5] +
+    "]).addTo(map);"
   ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(map)
   if (usrDet[4] == 4) {
     app.dialog.alert(
@@ -474,6 +471,7 @@ function addDetUI(usrDet) {
   }
 }
 function updateMarker(ix) {
+  alert("mod2")
   var exC1 = (ambList[ix][0] + ".remove();").toString(); // UID
   var exC2 = (
     ambList[ix][0] +
@@ -487,6 +485,7 @@ function updateMarker(ix) {
   ).toString();
   eval(exC1);
   eval(exC2);
+  alert('d')
 }
 function removeMarker(id) {
   if (ambList.length > 0) {
@@ -558,6 +557,13 @@ function addAmbList(ambData, ambID) {
       if (runOPSListStat == 0) {
         runOPSListStat = 1;
         nearPolL.classList.add("sheet-open", "color-orange");
+        if (firstSyncSuccess == false) {
+          firstSyncSuccess = true;
+        }
+      }
+    } else {
+      if (firstSyncSuccess == false) {
+        firstSyncSuccess = true;
       }
     }
   });
@@ -576,6 +582,7 @@ function recieveOPSData() {
       }
       // when location changes
       if (change.type === "modified") {
+        alert("mod")
         if (firstSyncSuccess == true) {
           if (ambList.length > 0) {
             try {
