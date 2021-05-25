@@ -401,7 +401,6 @@ function folUsr(id) {
   if (wasFol == true) {
     map.removeLayer("path");
     map.removeSource("path");
-    console.log("rem0");
   } else {
     document.getElementById("nearPolF").classList.remove("hideMapEl");
     globalThis.wasFol = true;
@@ -445,7 +444,6 @@ function stopFol() {
   document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
   map.removeLayer("path");
   map.removeSource("path");
-  console.log("rem");
 }
 
 function addDetUI(usrDet) {
