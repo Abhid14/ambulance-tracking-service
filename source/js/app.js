@@ -56,7 +56,7 @@ firebase.auth().onAuthStateChanged(function (user) {
     if (window.matchMedia("(display-mode: standalone)").matches) {
       document.getElementById("log").click();
     } else {
-      document.getElementById("pol").click();
+      document.getElementById("pwainstall").click();
     }
   }
 });
