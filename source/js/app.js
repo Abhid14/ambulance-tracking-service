@@ -56,7 +56,7 @@ firebase.auth().onAuthStateChanged(function (user) {
     if (window.matchMedia("(display-mode: standalone)").matches) {
       document.getElementById("log").click();
     } else {
-      document.getElementById("pwainstall").click();
+      document.getElementById("pol").click();
     }
   }
 });
@@ -106,12 +106,10 @@ function getPolData(user) {
           console.log("Error getting document:", error.code);
         });
     } else {
-      document.getElementById("userNameP").innerText = localStorage.getItem(
-        "userNameP"
-      );
-      document.getElementById("userBranchP").innerText = localStorage.getItem(
-        "userBranchP"
-      );
+      document.getElementById("userNameP").innerText =
+        localStorage.getItem("userNameP");
+      document.getElementById("userBranchP").innerText =
+        localStorage.getItem("userBranchP");
       document.getElementById("userEmailP").innerText = user.email;
       getPolMap();
     }
@@ -151,15 +149,12 @@ function getAmbData(user) {
           console.log("Error getting document:", error.code);
         });
     } else {
-      document.getElementById("userNameA").innerText = localStorage.getItem(
-        "userNameA"
-      );
-      document.getElementById("userBranchA").innerText = localStorage.getItem(
-        "userBranchA"
-      );
-      document.getElementById("vehicleNumber").innerText = localStorage.getItem(
-        "vehicleNumber"
-      );
+      document.getElementById("userNameA").innerText =
+        localStorage.getItem("userNameA");
+      document.getElementById("userBranchA").innerText =
+        localStorage.getItem("userBranchA");
+      document.getElementById("vehicleNumber").innerText =
+        localStorage.getItem("vehicleNumber");
       document.getElementById("userEmailA").innerText = user.email;
       getAmbMap();
     }
@@ -390,7 +385,9 @@ function getPolMap() {
       trackUserLocation: true,
     })
   );
+
   map.once("load", function () {
+    map.addControl(new MapboxTraffic());
     document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
     document.getElementById("nearPolL").classList.remove("hideMapEl");
     document.getElementById("nearPolB").classList.remove("hideMapEl");
@@ -399,7 +396,40 @@ function getPolMap() {
     recieveOPSData(); // call data reciever
   });
 }
+
 function folUsr(id) {
+  if (wasFol == true) {
+    map.removeLayer("path");
+    map.removeSource("path");
+    console.log("rem0");
+  } else {
+    document.getElementById("nearPolF").classList.remove("hideMapEl");
+    globalThis.wasFol = true;
+  }
+  navigator.geolocation.getCurrentPosition((pos) => {
+    var iPath = turf.lineString([
+      [pos.coords.longitude, pos.coords.latitude, 0.0],
+      [ambList[ix][6], ambList[ix][5], 0.0],
+    ]);
+    map.addSource("path", {
+      type: "geojson",
+      data: iPath,
+    });
+
+    map.addLayer({
+      id: "path",
+      type: "line",
+      source: "path",
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": ambList[ix][8][1],
+        "line-width": 6,
+      },
+    });
+  });
   var ix = ambList.findIndex(checkUID, id);
   app.sheet.close(".pol-sheet");
   map.flyTo({
@@ -407,28 +437,21 @@ function folUsr(id) {
     essential: true,
   });
 }
+
+function stopFol() {
+  wasFol = false;
+  document.getElementById("nearPolF").classList.add("hideMapEl");
+  app.sheet.close(".pol-sheet");
+  document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
+  map.removeLayer("path");
+  map.removeSource("path");
+  console.log("rem");
+}
+
 function addDetUI(usrDet) {
   nearPolT.innerText = `${ambList.length} Running OPS`;
   var runLi = document.createElement("li"); // dom manipulation method
-  switch (usrDet[4]) {
-    case 1:
-      var pty = "color-yellow";
-      var pColor = "#ffff00";
-      break;
-    case 2:
-      var pty = "color-orange";
-      var pColor = "#ffa500";
-      break;
-    case 3:
-      var pty = "color-red";
-      var pColor = "#ff0000";
-      break;
-    case 4:
-      var pty = "color-green";
-      var pColor = "#33cc33";
-      break;
-  }
-  runLi.innerHTML = `<a id="${usrDet[0]}"class="runOPSItem item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">${usrDet[1]}</div><div class="item-after"><span class="badge ${pty}">${usrDet[4]}</span></div></div><div class="item-subtitle">${usrDet[2]}</div><div class="item-subtitle">${usrDet[3]}</div><div class="item-subtitle">${usrDet[7]}</div></div></a>`;
+  runLi.innerHTML = `<a id="${usrDet[0]}"class="runOPSItem item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">${usrDet[1]}</div><div class="item-after"><span class="badge ${usrDet[8][0]}">${usrDet[4]}</span></div></div><div class="item-subtitle">${usrDet[2]}</div><div class="item-subtitle">${usrDet[3]}</div><div class="item-subtitle">${usrDet[7]}</div></div></a>`;
   $$(".runOPSCont").append(runLi);
   $$(".runOPSItem").on("click", function () {
     // realtime click event listener
@@ -438,14 +461,14 @@ function addDetUI(usrDet) {
   eval(
     usrDet[0] +
       "= new mapboxgl.Marker({color: '" +
-      pColor +
+      usrDet[8][1] +
       "',}).setLngLat([" +
       usrDet[6] +
       ", " +
       usrDet[5] +
       "]).addTo(map);"
   ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(map)
-  if (pty == "color-green") {
+  if (usrDet[4] == 4) {
     app.dialog.alert(
       "A Green corridor vehicle has been detected in your 4 km range!",
       "Important Alert!"
@@ -453,25 +476,11 @@ function addDetUI(usrDet) {
   }
 }
 function updateMarker(ix) {
-  switch (ambList[ix][4]) {
-    case 1:
-      var pColor = "#ffff00";
-      break;
-    case 2:
-      var pColor = "#ffa500";
-      break;
-    case 3:
-      var pColor = "#ff0000";
-      break;
-    case 4:
-      var pColor = "#33cc33";
-      break;
-  }
   var exC1 = (ambList[ix][0] + ".remove();").toString(); // UID
   var exC2 = (
     ambList[ix][0] +
     "= new mapboxgl.Marker({color: '" +
-    pColor +
+    ambList[ix][8][1] +
     "',}).setLngLat([" +
     ambList[ix][6] +
     ", " +
@@ -520,6 +529,21 @@ function addAmbList(ambData, ambID) {
         ambData.userLocation.longitude
       ) === true
     ) {
+      switch (ambData.priority) {
+        case 1:
+          var pColor = ["color-yellow", "#ffff00"];
+
+          break;
+        case 2:
+          var pColor = ["color-orange", "#ffa500"];
+          break;
+        case 3:
+          var pColor = ["color-red", "#ff0000"];
+          break;
+        case 4:
+          var pColor = ["color-green", "#33cc33"];
+          break;
+      }
       var usrDet = [
         ambID, // At index 0 this is UID of ambulance
         ambData.userName,
@@ -529,6 +553,7 @@ function addAmbList(ambData, ambID) {
         ambData.userLocation.latitude,
         ambData.userLocation.longitude,
         ambData.phoneNumber,
+        pColor,
       ];
       ambList.push(usrDet); // add data to global array
       addDetUI(usrDet); // this is used for updating ui
@@ -544,6 +569,7 @@ function recieveOPSData() {
   globalThis.firstSyncSuccess = false;
   globalThis.ambList = [];
   globalThis.runOPSListStat = 0;
+  globalThis.wasFol = false;
   db.collection("runningops").onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
       // when added
@@ -558,12 +584,10 @@ function recieveOPSData() {
               // changeIndex will be an integer if true else will be false
               var changeIndex = ambList.findIndex(checkUID, change.doc.id); // to find index
               if (changeIndex >= 0) {
-                ambList[
-                  changeIndex
-                ][5] = change.doc.data().userLocation.latitude;
-                ambList[
-                  changeIndex
-                ][6] = change.doc.data().userLocation.longitude;
+                ambList[changeIndex][5] =
+                  change.doc.data().userLocation.latitude;
+                ambList[changeIndex][6] =
+                  change.doc.data().userLocation.longitude;
                 updateMarker(changeIndex); //
               } else {
                 // here adding ambulance to our list if it suddenly enters our range

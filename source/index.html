@@ -18,24 +18,32 @@
     <link rel="stylesheet" href="./css/app.css" />
     <link rel="stylesheet" href="./css/icons.css" />
     <link href="./css/mapbox-gl.css" rel="stylesheet" />
-    <script>if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("/sw.js"); }); }
+    <link href="./css/mapbox-gl-traffic.css" rel="stylesheet" />
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("/sw.js");
+            });
+        }
     </script>
 </head>
 
 <body>
     <div id="app">
         <div class="views safe-areas" id="app-view">
-            <div class="view view-main view-init"> </div>
+            <div class="view view-main view-init"></div>
         </div>
         <a class="display-none" data-transition="f7-circle" href="/login/" data-view=".view-main" id="log">a</a>
-        <a class="display-none" data-transition="f7-circle" href="/ambulance/" data-view=".view-main" id="amb">b</a> <a
-            class="display-none" data-transition="f7-circle" href="/police/" data-view=".view-main" id="pol">c</a> <a
-            class="display-none" data-transition="f7-circle" href="/pwainstall/" data-view=".view-main"
+        <a class="display-none" data-transition="f7-circle" href="/ambulance/" data-view=".view-main" id="amb">b</a>
+        <a class="display-none" data-transition="f7-circle" href="/police/" data-view=".view-main" id="pol">c</a>
+        <a class="display-none" data-transition="f7-circle" href="/pwainstall/" data-view=".view-main"
             id="pwainstall">c</a>
     </div>
     <script defer src="./js/modules/framework7.bundle.min.js"></script>
     <script defer src="./js/routes.js"></script>
     <script defer src="./js/modules/mapbox-gl.js"></script>
+    <script defer src="./js/modules/mapbox-gl-traffic.js"></script>
+    <script defer src="./js/modules/turf.min.js"></script>
     <script defer src="./js/firebase/firebase-app.js"></script>
     <script defer src="./js/firebase/firebase-analytics.js"></script>
     <script defer src="./js/firebase/firebase-auth.js"></script>
