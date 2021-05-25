@@ -471,7 +471,6 @@ function addDetUI(usrDet) {
   }
 }
 function updateMarker(ix) {
-  alert("mod2")
   var exC1 = (ambList[ix][0] + ".remove();").toString(); // UID
   var exC2 = (
     ambList[ix][0] +
@@ -485,7 +484,6 @@ function updateMarker(ix) {
   ).toString();
   eval(exC1);
   eval(exC2);
-  alert('d')
 }
 function removeMarker(id) {
   if (ambList.length > 0) {
@@ -582,7 +580,6 @@ function recieveOPSData() {
       }
       // when location changes
       if (change.type === "modified") {
-        alert("mod")
         if (firstSyncSuccess == true) {
           if (ambList.length > 0) {
             try {
