@@ -242,7 +242,7 @@ function sendDataAmb() {
           phoneNumber: localStorage.getItem("phoneNumber"),
         })
         .then(() => {
-          console.log("Document successfully written to uid!");
+          //console.log("Document successfully written to uid!");
           //  callback
           function rtlsuccess(pos) {
             if (runningops == true) {
@@ -276,7 +276,7 @@ function sendDataAmb() {
             rtloptions // additional options
           );
         })
-        .catch((error) => { });
+        .catch((error) => {});
     });
     document.getElementById("startTripB").classList.remove("sheet-open");
     document.getElementById("startTripT").innerText = "STOP";
@@ -383,35 +383,58 @@ function folUsr(id) {
     document.getElementById("nearPolF").classList.remove("hideMapEl");
     globalThis.wasFol = true;
   }
-  navigator.geolocation.getCurrentPosition((pos) => {
-    var iPath = turf.lineString([
-      [pos.coords.longitude, pos.coords.latitude, 0.0],
-      [ambList[ix][6], ambList[ix][5], 0.0],
-    ]);
-    map.addSource("path", {
-      type: "geojson",
-      data: iPath,
-    });
-
-    map.addLayer({
-      id: "path",
-      type: "line",
-      source: "path",
-      layout: {
-        "line-join": "round",
-        "line-cap": "round",
-      },
-      paint: {
-        "line-color": ambList[ix][8][1],
-        "line-width": 6,
-      },
-    });
-  });
   var ix = ambList.findIndex(checkUID, id);
   app.sheet.close(".pol-sheet");
   map.flyTo({
     center: [ambList[ix][6], ambList[ix][5]],
     essential: true,
+  });
+  var routeArray = [];
+  var ambLoc = [ambList[ix][6], ambList[ix][5], 0.0];
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      var routeDir = JSON.parse(this.response);
+      for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
+        routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
+      }
+      routeArray.push(ambLoc);
+      var routePath = turf.lineString(routeArray);
+      map.addSource("path", {
+        type: "geojson",
+        data: routePath,
+      });
+      map.addLayer({
+        id: "path",
+        type: "line",
+        source: "path",
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": ambList[ix][8][1],
+          "line-width": 6,
+        },
+      });
+    }
+  };
+  navigator.geolocation.getCurrentPosition((pos) => {
+    var polLoc = [pos.coords.longitude, pos.coords.latitude, 0.0];
+    routeArray.push(polLoc);
+    var routeUrl =
+      "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+      polLoc[0] +
+      "," +
+      polLoc[1] +
+      ";" +
+      ambLoc[0] +
+      "," +
+      ambLoc[1] +
+      "?geometries=geojson&access_token=" +
+      "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
+    xhttp.open("GET", routeUrl, true);
+    xhttp.send();
   });
 }
 
@@ -431,9 +454,9 @@ function sortDistance(lat1, lon1, lat2, lon2) {
   var a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(deg2rad(lat1)) *
-    Math.cos(deg2rad(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   // d is the distance in kms
   var d = R * c;
@@ -455,13 +478,13 @@ function addDetUI(usrDet) {
   // we r creating markers for each ambulance
   eval(
     usrDet[0] +
-    "= new mapboxgl.Marker({color: '" +
-    usrDet[8][1] +
-    "',}).setLngLat([" +
-    usrDet[6] +
-    ", " +
-    usrDet[5] +
-    "]).addTo(map);"
+      "= new mapboxgl.Marker({color: '" +
+      usrDet[8][1] +
+      "',}).setLngLat([" +
+      usrDet[6] +
+      ", " +
+      usrDet[5] +
+      "]).addTo(map);"
   ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(map)
   if (usrDet[4] == 4) {
     app.dialog.alert(
