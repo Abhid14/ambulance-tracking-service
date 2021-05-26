@@ -218,16 +218,56 @@ function stopDataAmb() {
   document.getElementById("startTripB").onclick = "startDataAmb()";
   document.getElementById("startTripB").classList.add("sheet-open");
   document.getElementById("startTripT").innerText = "START";
+  map.removeLayer("path");
+  map.removeSource("path");
 }
 // on click start duty
 function sendDataAmb() {
   globalThis.userUID = localStorage.getItem("userUID");
   globalThis.runningops = true;
+  var firstRoute = true;
+  var routeArray = [];
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      if (firstRoute == false) {
+        routeArray = [];
+        map.removeLayer("path");
+        map.removeSource("path");
+      } else {
+        firstRoute = false;
+      }
+      var routeDir = JSON.parse(this.response);
+      for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
+        routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
+      }
+      routeArray.push(ambDest);
+      var routePath = turf.lineString(routeArray);
+      map.addSource("path", {
+        type: "geojson",
+        data: routePath,
+      });
+      map.addLayer({
+        id: "path",
+        type: "line",
+        source: "path",
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": "#34FF33",
+          "line-width": 6,
+        },
+      });
+    }
+  };
   if (app.input.validateInputs(document.getElementById("start-trip-form"))) {
+    document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
     var startformData = app.form.convertToData("#start-trip-form");
     navigator.geolocation.getCurrentPosition((pos) => {
-      var lat = pos.coords.latitude;
-      var lon = pos.coords.longitude;
+      var ambLoc = [pos.coords.longitude, pos.coords.latitude];
+      routeArray.push(ambLoc);
       //
       db.collection("runningops").doc(userUID).delete();
       //
@@ -236,9 +276,12 @@ function sendDataAmb() {
         .set({
           userName: localStorage.getItem("userNameA"),
           vehicleNumber: localStorage.getItem("vehicleNumber"),
-          destination: startformData.destination,
+          destination: [
+            startformData.destination,
+            new firebase.firestore.GeoPoint(ambDest[1], ambDest[0]),
+          ],
           priority: Number(startformData.priority),
-          userLocation: new firebase.firestore.GeoPoint(lat, lon),
+          userLocation: new firebase.firestore.GeoPoint(ambLoc[1], ambLoc[0]),
           phoneNumber: localStorage.getItem("phoneNumber"),
         })
         .then(() => {
@@ -246,16 +289,29 @@ function sendDataAmb() {
           //  callback
           function rtlsuccess(pos) {
             if (runningops == true) {
-              var rtlcrd = pos.coords;
+              ambLoc = [pos.coords.longitude, pos.coords.latitude];
               setTimeout(function () {
                 db.collection("runningops")
                   .doc(userUID)
                   .update({
                     userLocation: new firebase.firestore.GeoPoint(
-                      rtlcrd.latitude,
-                      rtlcrd.longitude
+                      ambLoc[1],
+                      ambLoc[0]
                     ),
                   });
+                var routeUrl =
+                  "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+                  ambLoc[0] +
+                  "," +
+                  ambLoc[1] +
+                  ";" +
+                  ambDest[0] +
+                  "," +
+                  ambDest[1] +
+                  "?geometries=geojson&access_token=" +
+                  "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
+                xhttp.open("GET", routeUrl, true);
+                xhttp.send();
               }, 2500);
             }
           }
@@ -276,7 +332,7 @@ function sendDataAmb() {
             rtloptions // additional options
           );
         })
-        .catch((error) => {});
+        .catch((error) => { });
     });
     document.getElementById("startTripB").classList.remove("sheet-open");
     document.getElementById("startTripT").innerText = "STOP";
@@ -312,9 +368,27 @@ function getAmbMap() {
         trackUserLocation: true, //
       })
     );
+    var geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl: mapboxgl,
+    });
+    document.getElementById("geocoder").appendChild(geocoder.onAdd(map));
     map.once("load", function () {
       document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
       document.getElementById("startTripB").classList.remove("hideMapEl");
+      document
+        .getElementsByClassName("mapboxgl-ctrl-geocoder--button")[0]
+        .remove();
+      document
+        .getElementsByClassName("mapboxgl-ctrl-geocoder--icon")[0]
+        .remove();
+      var destInp = document.getElementsByClassName(
+        "mapboxgl-ctrl-geocoder--input"
+      )[0];
+      destInp.setAttribute("required", "");
+      destInp.setAttribute("validate", "");
+      destInp.setAttribute("id", "destination");
+      destInp.setAttribute("name", "destination");
     });
   }
   function errorCallback(error) {
@@ -376,6 +450,7 @@ function getPolMap() {
 }
 
 function folUsr(id) {
+  var mpToken = "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw"
   if (wasFol == true) {
     map.removeLayer("path");
     map.removeSource("path");
@@ -390,15 +465,27 @@ function folUsr(id) {
     essential: true,
   });
   var routeArray = [];
-  var ambLoc = [ambList[ix][6], ambList[ix][5], 0.0];
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function () {
+  var ambLoc = [ambList[ix][6], ambList[ix][5]];
+  var getAP = new XMLHttpRequest();
+  var getPD = new XMLHttpRequest();
+
+  getAP.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       var routeDir = JSON.parse(this.response);
       for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
         routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
       }
       routeArray.push(ambLoc);
+      getPD.send();
+    }
+  };
+  getPD.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      var routeDir = JSON.parse(this.response);
+      for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
+        routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
+      }
+
       var routePath = turf.lineString(routeArray);
       map.addSource("path", {
         type: "geojson",
@@ -420,9 +507,9 @@ function folUsr(id) {
     }
   };
   navigator.geolocation.getCurrentPosition((pos) => {
-    var polLoc = [pos.coords.longitude, pos.coords.latitude, 0.0];
+    var polLoc = [pos.coords.longitude, pos.coords.latitude];
     routeArray.push(polLoc);
-    var routeUrl =
+    var routeAP =
       "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
       polLoc[0] +
       "," +
@@ -432,9 +519,23 @@ function folUsr(id) {
       "," +
       ambLoc[1] +
       "?geometries=geojson&access_token=" +
-      "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
-    xhttp.open("GET", routeUrl, true);
-    xhttp.send();
+      mpToken;
+    getAP.open("GET", routeAP, true);
+    var routePD =
+      "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+      ambLoc[0] +
+      "," +
+      ambLoc[1] +
+      ";" +
+      ambList[ix][3][1]["_long"] +
+      "," +
+      ambList[ix][3][1]["_lat"] +
+      "?geometries=geojson&access_token=" +
+      mpToken;
+    console.log(ambList[ix][3][1][1])
+    getAP.open("GET", routeAP, true);
+    getPD.open("GET", routePD, true);
+    getAP.send();
   });
 }
 
@@ -454,9 +555,9 @@ function sortDistance(lat1, lon1, lat2, lon2) {
   var a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   // d is the distance in kms
   var d = R * c;
@@ -469,7 +570,7 @@ function sortDistance(lat1, lon1, lat2, lon2) {
 function addDetUI(usrDet) {
   nearPolT.innerText = `${ambList.length} Running OPS`;
   var runLi = document.createElement("li"); // dom manipulation method
-  runLi.innerHTML = `<a id="${usrDet[0]}"class="runOPSItem item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">${usrDet[1]}</div><div class="item-after"><span class="badge ${usrDet[8][0]}">${usrDet[4]}</span></div></div><div class="item-subtitle">${usrDet[2]}</div><div class="item-subtitle">${usrDet[3]}</div><div class="item-subtitle">${usrDet[7]}</div></div></a>`;
+  runLi.innerHTML = `<a id="${usrDet[0]}"class="runOPSItem item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">${usrDet[1]}</div><div class="item-after"><span class="badge ${usrDet[8][0]}">${usrDet[4]}</span></div></div><div class="item-subtitle">${usrDet[2]}</div><div class="item-subtitle">${usrDet[3][0]}</div><div class="item-subtitle">${usrDet[7]}</div></div></a>`;
   $$(".runOPSCont").append(runLi);
   $$(".runOPSItem").on("click", function () {
     // realtime click event listener
@@ -478,13 +579,13 @@ function addDetUI(usrDet) {
   // we r creating markers for each ambulance
   eval(
     usrDet[0] +
-      "= new mapboxgl.Marker({color: '" +
-      usrDet[8][1] +
-      "',}).setLngLat([" +
-      usrDet[6] +
-      ", " +
-      usrDet[5] +
-      "]).addTo(map);"
+    "= new mapboxgl.Marker({color: '" +
+    usrDet[8][1] +
+    "',}).setLngLat([" +
+    usrDet[6] +
+    ", " +
+    usrDet[5] +
+    "]).addTo(map);"
   ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(map)
   if (usrDet[4] == 4) {
     app.dialog.alert(
