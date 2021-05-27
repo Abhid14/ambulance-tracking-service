@@ -6,11 +6,9 @@ app = new Framework7({
   theme: "md",
   routes,
 });
-window
-  .matchMedia("(display-mode: standalone)")
-  .addEventListener("change", (evt) => {
-    location.reload(); // bhuilt in html method to reload page
-  });
+window.matchMedia("(display-mode: standalone)").addEventListener("change", (evt) => {
+  location.reload(); // bhuilt in html method to reload page
+});
 // firebase init
 var firebaseConfig = {
   apiKey: "AIzaSyD8dDiGzBMWw2JRAqdfLnHILQA0XHBFBFU",
@@ -27,7 +25,7 @@ const db = firebase.firestore(); // db instance
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 firebase.analytics(); // google analytics
 // All authentication and app state management
-// this is executed first
+// This is executed first
 firebase.auth().onAuthStateChanged(function (user) {
   // realtime authenctication listener
   // if it is logged in
@@ -211,6 +209,7 @@ function signIn() {
 }
 // Main app functionality after logged in and  opened as app..
 // Belongs to ambulance
+// Stop broadcasting location #3
 function stopDataAmb() {
   runningops = false;
   db.collection("runningops").doc(userUID).delete();
@@ -221,7 +220,7 @@ function stopDataAmb() {
   map.removeLayer("path");
   map.removeSource("path");
 }
-// on click start duty
+// on click start duty #2
 function sendDataAmb() {
   globalThis.userUID = localStorage.getItem("userUID");
   globalThis.runningops = true;
@@ -351,7 +350,7 @@ function sendDataAmb() {
       .open();
   }
 }
-// 1st function
+// 1st function #1
 function getAmbMap() {
   function showPosition(position) {
     mapboxgl.accessToken =
@@ -409,19 +408,8 @@ function getAmbMap() {
     );
   }
 }
-// calculation and processing part
-function checkUID(usrArr) {
-  if (usrArr[0] == this) {
-    return true;
-  } else {
-    return false;
-  }
-}
-function deg2rad(deg) {
-  return deg * (Math.PI / 180);
-}
-// ui list part
 // belongs to police ui
+// Initiate police ui with map #1
 function getPolMap() {
   mapboxgl.accessToken =
     "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
@@ -448,106 +436,17 @@ function getPolMap() {
     recieveOPSData(); // call data reciever
   });
 }
-
-function folUsr(id) {
-  var mpToken = "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw"
-  if (wasFol == true) {
-    map.removeLayer("path");
-    map.removeSource("path");
+// Calculate distance and validate #4
+function checkUID(usrArr) {
+  if (usrArr[0] == this) {
+    return true;
   } else {
-    document.getElementById("nearPolF").classList.remove("hideMapEl");
-    globalThis.wasFol = true;
+    return false;
   }
-  var ix = ambList.findIndex(checkUID, id);
-  app.sheet.close(".pol-sheet");
-  map.flyTo({
-    center: [ambList[ix][6], ambList[ix][5]],
-    essential: true,
-  });
-  var routeArray = [];
-  var ambLoc = [ambList[ix][6], ambList[ix][5]];
-  var getAP = new XMLHttpRequest();
-  var getPD = new XMLHttpRequest();
-
-  getAP.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200) {
-      var routeDir = JSON.parse(this.response);
-      for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
-        routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
-      }
-      routeArray.push(ambLoc);
-      getPD.send();
-    }
-  };
-  getPD.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200) {
-      var routeDir = JSON.parse(this.response);
-      for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
-        routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
-      }
-
-      var routePath = turf.lineString(routeArray);
-      map.addSource("path", {
-        type: "geojson",
-        data: routePath,
-      });
-      map.addLayer({
-        id: "path",
-        type: "line",
-        source: "path",
-        layout: {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: {
-          "line-color": ambList[ix][8][1],
-          "line-width": 6,
-        },
-      });
-    }
-  };
-  navigator.geolocation.getCurrentPosition((pos) => {
-    var polLoc = [pos.coords.longitude, pos.coords.latitude];
-    routeArray.push(polLoc);
-    var routeAP =
-      "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
-      polLoc[0] +
-      "," +
-      polLoc[1] +
-      ";" +
-      ambLoc[0] +
-      "," +
-      ambLoc[1] +
-      "?geometries=geojson&access_token=" +
-      mpToken;
-    getAP.open("GET", routeAP, true);
-    var routePD =
-      "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
-      ambLoc[0] +
-      "," +
-      ambLoc[1] +
-      ";" +
-      ambList[ix][3][1]["_long"] +
-      "," +
-      ambList[ix][3][1]["_lat"] +
-      "?geometries=geojson&access_token=" +
-      mpToken;
-    console.log(ambList[ix][3][1][1])
-    getAP.open("GET", routeAP, true);
-    getPD.open("GET", routePD, true);
-    getAP.send();
-  });
 }
-
-function stopFol() {
-  wasFol = false;
-  document.getElementById("nearPolF").classList.add("hideMapEl");
-  app.sheet.close(".pol-sheet");
-  document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
-  map.removeLayer("path");
-  map.removeSource("path");
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
 }
-
 function sortDistance(lat1, lon1, lat2, lon2) {
   var R = 6371;
   var dLat = deg2rad(lat2 - lat1);
@@ -567,48 +466,25 @@ function sortDistance(lat1, lon1, lat2, lon2) {
     return false;
   }
 }
-function addDetUI(usrDet) {
-  nearPolT.innerText = `${ambList.length} Running OPS`;
-  var runLi = document.createElement("li"); // dom manipulation method
-  runLi.innerHTML = `<a id="${usrDet[0]}"class="runOPSItem item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">${usrDet[1]}</div><div class="item-after"><span class="badge ${usrDet[8][0]}">${usrDet[4]}</span></div></div><div class="item-subtitle">${usrDet[2]}</div><div class="item-subtitle">${usrDet[3][0]}</div><div class="item-subtitle">${usrDet[7]}</div></div></a>`;
-  $$(".runOPSCont").append(runLi);
-  $$(".runOPSItem").on("click", function () {
-    // realtime click event listener
-    folUsr(this.id);
-  });
-  // we r creating markers for each ambulance
-  eval(
-    usrDet[0] +
-    "= new mapboxgl.Marker({color: '" +
-    usrDet[8][1] +
-    "',}).setLngLat([" +
-    usrDet[6] +
-    ", " +
-    usrDet[5] +
-    "]).addTo(map);"
-  ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(map)
-  if (usrDet[4] == 4) {
-    app.dialog.alert(
-      "A Green corridor vehicle has been detected in your 4 km range!",
-      "Important Alert!"
-    );
+// Updating Markers when needed # 5
+function updateMarker(ix) {
+  if (wasFol == false) {
+    var exC1 = (ambList[ix][0] + ".remove();").toString(); // UID
+    var exC2 = (
+      ambList[ix][0] +
+      "= new mapboxgl.Marker({color: '" +
+      ambList[ix][8][1] +
+      "',}).setLngLat([" +
+      ambList[ix][6] +
+      ", " +
+      ambList[ix][5] +
+      "]).addTo(map);"
+    ).toString();
+    eval(exC1);
+    eval(exC2);
   }
 }
-function updateMarker(ix) {
-  var exC1 = (ambList[ix][0] + ".remove();").toString(); // UID
-  var exC2 = (
-    ambList[ix][0] +
-    "= new mapboxgl.Marker({color: '" +
-    ambList[ix][8][1] +
-    "',}).setLngLat([" +
-    ambList[ix][6] +
-    ", " +
-    ambList[ix][5] +
-    "]).addTo(map);"
-  ).toString();
-  eval(exC1);
-  eval(exC2);
-}
+// Remove marker when required #6
 function removeMarker(id) {
   if (ambList.length > 0) {
     try {
@@ -638,59 +514,220 @@ function removeMarker(id) {
     }
   }
 }
-function addAmbList(ambData, ambID) {
-  navigator.geolocation.getCurrentPosition((pos) => {
-    if (
-      sortDistance(
-        pos.coords.latitude,
-        pos.coords.longitude,
-        ambData.userLocation.latitude,
-        ambData.userLocation.longitude
-      ) === true
-    ) {
-      switch (ambData.priority) {
-        case 1:
-          var pColor = ["color-yellow", "#ffff00"];
+// Modifying list #4
+function addDetUI(usrDet) {
+  nearPolT.innerText = `${ambList.length} Running OPS`;
+  var runLi = document.createElement("li"); // dom manipulation method
+  runLi.innerHTML = `<a id="${usrDet[0]}"class="runOPSItem item-link item-content"><div class="item-inner"><div class="item-title-row"><div class="item-title">${usrDet[1]}</div><div class="item-after"><span class="badge ${usrDet[8][0]}">${usrDet[4]}</span></div></div><div class="item-subtitle">${usrDet[2]}</div><div class="item-subtitle">${usrDet[3][0]}</div><div class="item-subtitle">${usrDet[7]}</div></div></a>`;
+  $$(".runOPSCont").append(runLi);
+  $$(".runOPSItem").on("click", function () {
+    // realtime click event listener
+    folUsr(this.id);
+  });
+  // we r creating markers for each ambulance
+  eval(
+    usrDet[0] +
+    "= new mapboxgl.Marker({color: '" +
+    usrDet[8][1] +
+    "',}).setLngLat([" +
+    usrDet[6] +
+    ", " +
+    usrDet[5] +
+    "]).addTo(map);"
+  ); // Bjkfjkd = mapboxgl.Marker({color:'#33cc3' ,}).setLngLat(["77.77","12.77"]).addTo(map)
+  if (usrDet[4] == 4) {
+    app.dialog.alert(
+      "A Green corridor vehicle has been detected in your 4 km range!",
+      "Important Alert!"
+    );
+  }
+}
+// Adding data to array and ui #3
+function addAmbList(ambData, ambID, isChange) {
+  var dupIndex = ambList.findIndex(checkUID, ambID);
+  console.log(dupIndex);
+  if (dupIndex == -1) {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      if (
+        sortDistance(
+          pos.coords.latitude,
+          pos.coords.longitude,
+          ambData.userLocation.latitude,
+          ambData.userLocation.longitude
+        ) === true
+      ) {
+        switch (ambData.priority) {
+          case 1:
+            var pColor = ["color-yellow", "#ffff00"];
 
-          break;
-        case 2:
-          var pColor = ["color-orange", "#ffa500"];
-          break;
-        case 3:
-          var pColor = ["color-red", "#ff0000"];
-          break;
-        case 4:
-          var pColor = ["color-green", "#33cc33"];
-          break;
-      }
-      var usrDet = [
-        ambID, // At index 0 this is UID of ambulance
-        ambData.userName,
-        ambData.vehicleNumber,
-        ambData.destination,
-        ambData.priority,
-        ambData.userLocation.latitude,
-        ambData.userLocation.longitude,
-        ambData.phoneNumber,
-        pColor,
-      ];
-      ambList.push(usrDet); // add data to global array
-      addDetUI(usrDet); // this is used for updating ui
-      if (runOPSListStat == 0) {
-        runOPSListStat = 1;
-        nearPolL.classList.add("sheet-open", "color-orange");
+            break;
+          case 2:
+            var pColor = ["color-orange", "#ffa500"];
+            break;
+          case 3:
+            var pColor = ["color-red", "#ff0000"];
+            break;
+          case 4:
+            var pColor = ["color-green", "#33cc33"];
+            break;
+        }
+        var usrDet = [
+          ambID, // At index 0 this is UID of ambulance
+          ambData.userName,
+          ambData.vehicleNumber,
+          ambData.destination,
+          ambData.priority,
+          ambData.userLocation.latitude,
+          ambData.userLocation.longitude,
+          ambData.phoneNumber,
+          pColor,
+        ];
+        ambList.push(usrDet); // add data to global array
+        addDetUI(usrDet); // this is used for updating ui
+        if (runOPSListStat == 0) {
+          runOPSListStat = 1;
+          nearPolL.classList.add("sheet-open", "color-orange");
+          if (firstSyncSuccess == false) {
+            firstSyncSuccess = true;
+          }
+        }
+      } else {
         if (firstSyncSuccess == false) {
           firstSyncSuccess = true;
         }
       }
-    } else {
-      if (firstSyncSuccess == false) {
-        firstSyncSuccess = true;
-      }
+    });
+    if (isChange == true) {
+      app.notification
+        .create({
+          icon: '<i class="material-icons md-only">warning</i>',
+          title: "Attention",
+          titleRightText: "now",
+          subtitle: "An ambulance has been detected in your range!",
+          text:
+            "Driver: " +
+            change.doc.data().userName +
+            " Vehicle Number: " +
+            change.doc.data().vehicleNumber,
+          closeTimeout: 3000,
+        })
+        .open();
     }
+  }
+}// follow or unfollow a,b #7 & #8
+function folUsr(id) {
+  if (wasFol == true) {
+    document.getElementById("nearPolD").classList.add("hideMapEl");
+    map.removeLayer(prevFol);
+    map.removeSource(prevFol);
+  } else {
+    document.getElementById("nearPolF").classList.remove("hideMapEl");
+    globalThis.wasFol = true;
+  }
+  var mpToken =
+    "pk.eyJ1IjoiYWJoaXJhbmdlcm1hcGJveCIsImEiOiJja25sNjJ4d3QwMjRzMnFsaTF2eno2Y2N0In0.R2nh61HBc6YfuLxTHO6SPw";
+  var ix = ambList.findIndex(checkUID, id);
+  document
+    .getElementById("stopFol")
+    .setAttribute("onclick", "stopFol('" + id + "')");
+  app.sheet.close(".pol-sheet");
+  map.flyTo({
+    center: [ambList[ix][6], ambList[ix][5]],
+    essential: true,
+  });
+  var routeArray = [];
+  var ambLoc = [ambList[ix][6], ambList[ix][5]];
+  var getAP = new XMLHttpRequest();
+  var getPD = new XMLHttpRequest();
+
+  getAP.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      var routeDir = JSON.parse(this.response);
+      for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
+        routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
+      }
+      routeArray.push(ambLoc);
+      var distAmb = routeDir["routes"][0]["distance"].toString().split(".")[0];
+      if (distAmb.length > 3) {
+        document.getElementById("nearPolDText").innerText =
+          distAmb[0] + "." + distAmb[1] + " KM";
+      } else {
+        document.getElementById("nearPolDText").innerText = distAmb + " M";
+      }
+      getPD.send();
+    }
+  };
+  getPD.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      globalThis.routeDir = JSON.parse(this.response);
+      for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
+        routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
+      }
+      var routePath = turf.lineString(routeArray);
+      map.addSource(id, {
+        type: "geojson",
+        data: routePath,
+      });
+      map.addLayer({
+        id: id,
+        type: "line",
+        source: id,
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": ambList[ix][8][1],
+          "line-width": 6,
+        },
+      });
+      globalThis.prevFol = id;
+      //document.getElementById("nearPolD").innerText =
+      document.getElementById("nearPolD").classList.remove("hideMapEl");
+    }
+  };
+  navigator.geolocation.getCurrentPosition((pos) => {
+    var polLoc = [pos.coords.longitude, pos.coords.latitude];
+    routeArray.push(polLoc);
+    var routeAP =
+      "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+      polLoc[0] +
+      "," +
+      polLoc[1] +
+      ";" +
+      ambLoc[0] +
+      "," +
+      ambLoc[1] +
+      "?geometries=geojson&access_token=" +
+      mpToken;
+    getAP.open("GET", routeAP, true);
+    var routePD =
+      "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+      ambLoc[0] +
+      "," +
+      ambLoc[1] +
+      ";" +
+      ambList[ix][3][1]["_long"] +
+      "," +
+      ambList[ix][3][1]["_lat"] +
+      "?geometries=geojson&access_token=" +
+      mpToken;
+    getAP.open("GET", routeAP, true);
+    getPD.open("GET", routePD, true);
+    getAP.send();
   });
 }
-/// data  reciever
+function stopFol(id) {
+  wasFol = false;
+  document.getElementById("nearPolF").classList.add("hideMapEl");
+  app.sheet.close(".pol-sheet");
+  document.getElementById("nearPolD").classList.add("hideMapEl");
+  document.getElementById("nearPolDText").innerText = "";
+  document.getElementsByClassName("mapboxgl-ctrl-geolocate")[0].click();
+  map.removeLayer(id);
+  map.removeSource(id);
+}
+/// data  reciever #2
 function recieveOPSData() {
   globalThis.firstSyncSuccess = false;
   globalThis.ambList = [];
@@ -717,22 +754,22 @@ function recieveOPSData() {
                 updateMarker(changeIndex); //
               } else {
                 // here adding ambulance to our list if it suddenly enters our range
-                addAmbList(change.doc.data(), change.doc.id);
+                addAmbList(change.doc.data(), change.doc.id, true);
               }
             } catch (error) {
               console.log(error);
             }
           } else {
-            var dupIndex = ambList.findIndex(checkUID, change.doc.id);
-            if (dupIndex != -1) {
-              addAmbList(change.doc.data(), change.doc.id);
-            }
+            addAmbList(change.doc.data(), change.doc.id, true);
           }
         }
       }
       // when removed
       if (change.type === "removed") {
         removeMarker(change.doc.id);
+        if (map.getLayer(change.doc.id)["id"] == change.doc.id) {
+          stopFol(change.doc.id);
+        }
       }
     });
   });
