@@ -545,7 +545,6 @@ function addDetUI(usrDet) {
 // Adding data to array and ui #3
 function addAmbList(ambData, ambID, isChange) {
   var dupIndex = ambList.findIndex(checkUID, ambID);
-  console.log(dupIndex);
   if (dupIndex == -1) {
     navigator.geolocation.getCurrentPosition((pos) => {
       if (
@@ -637,31 +636,20 @@ function folUsr(id) {
   });
   var routeArray = [];
   var ambLoc = [ambList[ix][6], ambList[ix][5]];
-  var getAP = new XMLHttpRequest();
-  var getPD = new XMLHttpRequest();
-
-  getAP.onreadystatechange = function () {
+  var getAD = new XMLHttpRequest();
+  getAD.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
-      var routeDir = JSON.parse(this.response);
+      routeArray.push(ambLoc);
+      globalThis.routeDir = JSON.parse(this.response);
       for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
         routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
       }
-      routeArray.push(ambLoc);
       var distAmb = routeDir["routes"][0]["distance"].toString().split(".")[0];
       if (distAmb.length > 3) {
         document.getElementById("nearPolDText").innerText =
           distAmb[0] + "." + distAmb[1] + " KM";
       } else {
         document.getElementById("nearPolDText").innerText = distAmb + " M";
-      }
-      getPD.send();
-    }
-  };
-  getPD.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200) {
-      globalThis.routeDir = JSON.parse(this.response);
-      for (i in routeDir["routes"][0]["geometry"]["coordinates"]) {
-        routeArray.push(routeDir["routes"][0]["geometry"]["coordinates"][i]);
       }
       var routePath = turf.lineString(routeArray);
       map.addSource(id, {
@@ -682,40 +670,22 @@ function folUsr(id) {
         },
       });
       globalThis.prevFol = id;
-      //document.getElementById("nearPolD").innerText =
       document.getElementById("nearPolD").classList.remove("hideMapEl");
     }
   };
-  navigator.geolocation.getCurrentPosition((pos) => {
-    var polLoc = [pos.coords.longitude, pos.coords.latitude];
-    routeArray.push(polLoc);
-    var routeAP =
-      "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
-      polLoc[0] +
-      "," +
-      polLoc[1] +
-      ";" +
-      ambLoc[0] +
-      "," +
-      ambLoc[1] +
-      "?geometries=geojson&access_token=" +
-      mpToken;
-    getAP.open("GET", routeAP, true);
-    var routePD =
-      "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
-      ambLoc[0] +
-      "," +
-      ambLoc[1] +
-      ";" +
-      ambList[ix][3][1]["_long"] +
-      "," +
-      ambList[ix][3][1]["_lat"] +
-      "?geometries=geojson&access_token=" +
-      mpToken;
-    getAP.open("GET", routeAP, true);
-    getPD.open("GET", routePD, true);
-    getAP.send();
-  });
+  var routeAD =
+    "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/" +
+    ambLoc[0] +
+    "," +
+    ambLoc[1] +
+    ";" +
+    ambList[ix][3][1]["_long"] +
+    "," +
+    ambList[ix][3][1]["_lat"] +
+    "?geometries=geojson&access_token=" +
+    mpToken;
+  getAD.open("GET", routeAD, true);
+  getAD.send();
 }
 function stopFol(id) {
   wasFol = false;
