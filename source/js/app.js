@@ -736,10 +736,10 @@ function recieveOPSData() {
       }
       // when removed
       if (change.type === "removed") {
-        removeMarker(change.doc.id);
         if (map.getLayer(change.doc.id)["id"] == change.doc.id) {
           stopFol(change.doc.id);
         }
+        removeMarker(change.doc.id);
       }
     });
   });
