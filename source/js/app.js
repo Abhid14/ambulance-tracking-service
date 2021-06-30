@@ -605,9 +605,9 @@ function addAmbList(ambData, ambID, isChange) {
           subtitle: "An ambulance has been detected in your range!",
           text:
             "Driver: " +
-            change.doc.data().userName +
+            ambData.userName +
             " Vehicle Number: " +
-            change.doc.data().vehicleNumber,
+            ambData.vehicleNumber,
           closeTimeout: 3000,
         })
         .open();
