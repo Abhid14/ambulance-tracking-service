@@ -460,6 +460,7 @@ function sortDistance(lat1, lon1, lat2, lon2) {
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   // d is the distance in kms
   var d = R * c;
+  console.log("calc")
   if (d < 4) {
     return true;
   } else {
@@ -590,28 +591,28 @@ function addAmbList(ambData, ambID, isChange) {
             firstSyncSuccess = true;
           }
         }
-      } else {
-        if (firstSyncSuccess == false) {
-          firstSyncSuccess = true;
+        if (isChange == true) {
+          app.notification
+            .create({
+              icon: '<i class="material-icons md-only">warning</i>',
+              title: "Attention",
+              titleRightText: "now",
+              subtitle: "An ambulance has been detected in your range!",
+              text:
+                "Driver: " +
+                ambData.userName +
+                " Vehicle Number: " +
+                ambData.vehicleNumber,
+              closeTimeout: 3000,
+            })
+            .open();
         }
       }
+      if (firstSyncSuccess == false) {
+        console.log("event")
+        firstSyncSuccess = true;
+      }
     });
-    if (isChange == true) {
-      app.notification
-        .create({
-          icon: '<i class="material-icons md-only">warning</i>',
-          title: "Attention",
-          titleRightText: "now",
-          subtitle: "An ambulance has been detected in your range!",
-          text:
-            "Driver: " +
-            ambData.userName +
-            " Vehicle Number: " +
-            ambData.vehicleNumber,
-          closeTimeout: 3000,
-        })
-        .open();
-    }
   }
 }// follow or unfollow a,b #7 & #8
 function folUsr(id) {
